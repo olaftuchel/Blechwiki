@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@+id/mainActivity">
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="org.redderei.Blechwiki.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/fundstellenBuchFragment"
+        android:name="org.redderei.Blechwiki.FundstellenBuchFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" />
+    <fragment
+        android:id="@+id/fundstellenTitelFragment2"
+        android:name="org.redderei.Blechwiki.FundstellenTitelFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" />
+    <fragment
+        android:id="@+id/buchFragment"
+        android:name="org.redderei.Blechwiki.BuchFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" >
+        <action
+            android:id="@+id/action_buchFragment_to_fundstellenTitelFragment2"
+            app:destination="@id/fundstellenTitelFragment2" />
+        <action
+            android:id="@+id/action_buchFragment_to_buchDetailActivity"
+            app:destination="@id/buchDetailActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/titelFragment"
+        android:name="org.redderei.Blechwiki.TitelFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" >
+        <action
+            android:id="@+id/action_titelFragment_to_fundstellenBuchFragment"
+            app:destination="@id/fundstellenBuchFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/liedFragment"
+        android:name="org.redderei.Blechwiki.LiedFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" >
+        <action
+            android:id="@+id/action_liedFragment_to_fundstellenLiedFragment2"
+            app:destination="@id/fundstellenLiedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/komponistFragment"
+        android:name="org.redderei.Blechwiki.KomponistFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" >
+        <action
+            android:id="@+id/action_komponistFragment_to_fundstellenTitelFragment2"
+            app:destination="@id/fundstellenTitelFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/fundstellenLiedFragment"
+        android:name="org.redderei.Blechwiki.FundstellenLiedFragment"
+        android:label="fragment_blank"
+        tools:layout="@layout/fragment_blank" />
+    <activity
+        android:id="@+id/activityDetail"
+        android:name="org.redderei.Blechwiki.ActivityDetail"
+        android:label="activity_detail_container"
+        tools:layout="@layout/activity_detail_container" />
+    <activity
+        android:id="@+id/buchDetailActivity"
+        android:name="org.redderei.Blechwiki.BuchDetailActivity"
+        android:label="buch_detail"
+        tools:layout="@layout/buch_detail" />
+    <activity
+        android:id="@+id/about"
+        android:name="org.redderei.Blechwiki.About"
+        android:label="about"
+        tools:layout="@layout/about" />
+
+</navigation>

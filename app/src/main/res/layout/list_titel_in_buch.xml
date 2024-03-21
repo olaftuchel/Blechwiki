@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Details zu einem Titel mit Buchdeckblatt, Titel, Untertitel, Nummer, Vorzeichen und Besetzung -->
+<!--  dazu EG Liedtitel -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/buch_list_titel_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <!-- ListRow Left side Thumbnail image -->
+
+    <!-- Entry titel_eglied is only used above titel in buch list -->
+    <TextView
+        android:id="@+id/titel_eglied"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:maxLines="3"
+        android:padding="2dp"
+        android:textColor="#505050"
+        android:textSize="14sp"
+        tools:text="LiedTitel"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/buch_list_thumbnail"
+        android:layout_below="@+id/titel_eglied"
+        android:layout_width="40dp"
+        android:layout_height="60dp"
+        android:layout_gravity="start"
+        android:contentDescription="thumbnail"
+        android:scaleType="centerInside"
+        android:padding="2dp"
+        tools:src="@drawable/keinbild" />
+
+    <RelativeLayout
+        android:id="@id/line1"
+        android:layout_below="@id/titel_eglied"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/buch_list_thumbnail"
+        android:layout_toEndOf="@id/buch_list_thumbnail">
+
+        <TextView
+            android:id="@+id/titel_main"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@id/play"
+            android:layout_toStartOf="@id/play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:padding="2dp"
+            android:textColor="#505050"
+            android:textSize="18sp"
+            tools:text="Titel" />
+
+        <ImageView
+            android:id="@+id/play"
+            android:layout_toLeftOf="@id/buch_list_nr"
+            android:layout_toStartOf="@id/buch_list_nr"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="start"
+            android:contentDescription="playicon"
+            android:scaleType="centerInside"
+            android:padding="4dp"
+            android:src="@drawable/icons8play24orig"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/buch_list_nr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:maxLines="1"
+            android:padding="2dp"
+            android:textColor="#505050"
+            android:textSize="18sp"
+            tools:text="Nr" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/line2"
+        android:layout_below="@id/line1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/buch_list_thumbnail"
+        android:layout_toEndOf="@id/buch_list_thumbnail">
+
+        <TextView
+            android:id="@+id/titel_sub1"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@id/buch_list_vorzeichen"
+            android:layout_toStartOf="@id/buch_list_vorzeichen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:padding="2dp"
+            android:textSize="12sp"
+            tools:text="Untertitel1" />
+
+        <TextView
+            android:id="@+id/buch_list_vorzeichen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:maxLines="1"
+            android:padding="2dp"
+            android:textSize="12sp"
+            tools:text="Vorzeichen" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/line3"
+        android:layout_below="@id/line2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/buch_list_thumbnail"
+        android:layout_toEndOf="@id/buch_list_thumbnail">
+
+        <TextView
+            android:id="@+id/titel_sub2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@id/buch_list_besetzung"
+            android:layout_toStartOf="@id/buch_list_besetzung"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:maxLines="3"
+            android:padding="2dp"
+            android:textSize="14sp"
+            tools:text="UnterTitel2" />
+
+        <TextView
+            android:id="@+id/buch_list_besetzung"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:maxLines="2"
+            android:padding="2dp"
+            android:textSize="12sp"
+            tools:text="Besetzung" />
+    </RelativeLayout>
+</RelativeLayout>

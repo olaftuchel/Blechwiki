@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:paddingBottom="2dp"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="2dp">
+
+    <TextView
+        android:id="@+id/lied_list_nr"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="4dp"
+        android:maxLines="1"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        android:textColor="#505050"
+        android:textSize="18sp"
+        tools:text="Nr" />
+
+    <RelativeLayout
+        android:id="@+id/lied_list_text_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/lied_list_nr"
+        android:layout_toRightOf="@id/lied_list_nr">
+
+        <!-- anlass is only used with sortType = anlass -->
+        <TextView
+            android:id="@+id/lied_anlass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:maxLines="3"
+            android:padding="2dp"
+            android:textColor="#505050"
+            android:textSize="12sp"
+            tools:text="LiedAnlass"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/lied_list_lied"
+            android:layout_below="@+id/lied_anlass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            tools:text="Lied" />
+    </RelativeLayout>
+
+</RelativeLayout>

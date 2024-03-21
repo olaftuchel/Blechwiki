@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_action_search"
+        android:icon="@drawable/ic_action_search"
+        android:orderInCategory="10"
+        android:title="@string/menu_action_search"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <item android:id="@+id/menu_action_kirche"
+        android:orderInCategory="11"
+        android:title="@string/landeskirche"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_action_sort_ABC"
+        android:orderInCategory="11"
+        android:title="@string/menu_action_sort_ABC"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_action_sort_Nr"
+        android:orderInCategory="11"
+        android:title="@string/menu_action_sort_Nr"
+        app:showAsAction="never"/>
+    <item android:id="@+id/menu_action_sort_Anlass"
+        android:orderInCategory="11"
+        android:title="@string/menu_action_sort_Anlass"
+        android:showAsAction="never"/>
+    <item android:id="@+id/menu_action_ueber"
+        android:orderInCategory="12"
+        android:title="@string/menu_action_about"
+        app:showAsAction="never"/>
+</menu>

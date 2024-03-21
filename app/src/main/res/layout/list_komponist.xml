@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/komponist_list_text_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/komponist_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/komponist_list_geboren"
+        android:layout_toLeftOf="@id/komponist_list_geboren"
+        android:maxLines="2"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:textSize="18sp"
+        tools:text="Komponist"/>
+
+    <TextView
+        android:id="@+id/komponist_list_geboren"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:maxLines="1"
+        android:padding="2dp"
+        android:textSize="12sp"
+        tools:text="Geboren" />
+
+    <TextView
+        android:id="@+id/komponist_list_gestorben"
+        android:layout_below="@+id/komponist_list_geboren"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:maxLines="1"
+        android:padding="2dp"
+        android:textSize="12sp"
+        tools:text="Gestorben" />
+</RelativeLayout>
