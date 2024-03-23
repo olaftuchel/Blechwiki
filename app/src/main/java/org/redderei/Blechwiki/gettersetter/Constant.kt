@@ -39,8 +39,8 @@ object Constant {
     const val CHANGE = "change"
 
     const val TABLE_BUCH = "buch_table"
-    const val BUCHID = "buch_id"
-    const val BUCHKURZ = "buch_kurz"
+    const val BUCHID = "buchId"
+    const val BUCHKURZ = "buchkurz"
     const val BUCH = "buch"
     const val UNTERTITEL = "buchuntertitel"
     const val ERSCHEINJAHR = "erscheinjahr"

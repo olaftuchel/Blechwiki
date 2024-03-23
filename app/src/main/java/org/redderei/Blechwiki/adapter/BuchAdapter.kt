@@ -33,7 +33,7 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
         var detailTextView: TextView
         var thumbnailImageView: ImageView
         fun bind(item: BuchClass) {
-            titleTextView.text = item.Buch
+            titleTextView.text = item.buch
         }
 
         init {
@@ -57,8 +57,8 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
 
     override fun onBindViewHolder(holder: BuchViewHolder, position: Int) {
         Log.v(TAG, "BuchAdapter (onBindViewHolder)");
-        holder.titleTextView.text = mBuchList[position].Buch
-        holder.subtitleTextView.text = mBuchList[position].Untertitel
+        holder.titleTextView.text = mBuchList[position].buch
+        holder.subtitleTextView.text = mBuchList[position].untertitel
 //        holder.detailTextView.text = mBuchList[position].erscheinjahr
         //this would be normal varian for imgUrl
 //        Picasso.get().load(mBuchList[position].imgUrl).placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
@@ -80,7 +80,7 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 var charString = charSequence.toString()
-                charString = charString.toLowerCase(Locale.getDefault())
+                charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
                     mBuchListOriginal = mBuchList // filtering starts
                     charStringOld = charString
@@ -91,7 +91,7 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
                 } else {
                     val filteredList: MutableList<BuchClass> = ArrayList()
                     for (row in mBuchList) {
-                        if (row.Buch.toLowerCase(Locale.getDefault()).contains(charString)) {
+                        if (row.buch.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }

@@ -24,7 +24,7 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
     class TitelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var titleTextView: TextView
         fun bind(item: BuchClass) {
-            titleTextView.text = item.Buch
+            titleTextView.text = item.buch
         }
 
         init {

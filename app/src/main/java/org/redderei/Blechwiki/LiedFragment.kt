@@ -12,17 +12,21 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.LiedClass
 import org.redderei.Blechwiki.adapter.LiedAdapter
 import org.redderei.Blechwiki.repository.LiedViewModel
 import org.redderei.Blechwiki.util.*
-import org.redderei.posaunote.R
 
 /**
  * Basis for Tabviews:
@@ -43,7 +47,6 @@ class LiedFragment : Fragment(), View.OnClickListener {
     private lateinit var rootView: View
     private val mDualPane = false
     private var sortType = ""
-//??    public final mBlechViewModel = getArguments()
     private var liedViewModel: LiedViewModel? = null
     private val sharedPreference: SharedPreference = SharedPreference(appContext)
 
@@ -68,16 +71,21 @@ class LiedFragment : Fragment(), View.OnClickListener {
         // Lieder einer Landeskirche (Teil)
         mKirche = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
         sortType = sharedPreference.getValueString(Constant.PREF_SORTTYPE).toString()
-//        mBlechViewModel = ViewModelProvider(this).get(BlechViewModel::class.java)
+
+        liedViewModel = ViewModelProvider(this).get(LiedViewModel::class.java)
 //        MainActivity.appContext.blechViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, { lieder -> // Update the cached copy of the words in the adapter.
         // Update the cached copy of the words in the adapter.
-            liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, {lieder ->
-            Log.v(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
-            mAdapter.setListEntries(lieder)
-            // calculate Index List and show it up
-            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-            SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-        })
+        GlobalScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(appContext, {lieder ->
+                    Log.v(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
+                    mAdapter.setListEntries(lieder)
+                    // calculate Index List and show it up
+                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                })
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -222,13 +230,24 @@ class LiedFragment : Fragment(), View.OnClickListener {
                 mKirche = a.withItems(mKircheOld)
                 sharedPreference.save(Constant.PREF_KIRCHE, mKirche!!)
                 Log.v(ContentValues.TAG, "LiedFragment (onOptionsItemSelected): mKirche=$mKirche selected")
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(requireActivity(), { lieder -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
-                    mAdapter!!.setListEntries(lieder)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                GlobalScope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
+                            requireActivity(),
+                            { lieder -> // Update the cached copy of the words in the adapter.
+                                Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
+                                mAdapter!!.setListEntries(lieder)
+                                // calculate Index List and show it up
+                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                                SideIndex.displayIndex(
+                                    mapIndex,
+                                    rootView,
+                                    layoutInflater,
+                                    mOnClickListener
+                                )
+                            })
+                        }
+                    }
 
 //                val p = PromptForResult()
 //                p.promptForResult(context, mKirche, p : PromptRunnable() {
@@ -251,39 +270,78 @@ class LiedFragment : Fragment(), View.OnClickListener {
                 //                Toast.makeText(getActivity(), "sort ABC", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "ABC")
                 sortType = "ABC"
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, { lieder -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): sortType changed to $sortType")
-                    mAdapter!!.setListEntries(lieder)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                GlobalScope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
+                            requireActivity(),
+                            { lieder -> // Update the cached copy of the words in the adapter.
+                                Log.d(
+                                    ContentValues.TAG,
+                                    "LiedFragment (onCreate: onChanged): sortType changed to $sortType"
+                                )
+                                mAdapter!!.setListEntries(lieder)
+                                // calculate Index List and show it up
+                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                                SideIndex.displayIndex(
+                                    mapIndex,
+                                    rootView,
+                                    layoutInflater,
+                                    mOnClickListener
+                                )
+                            })
+                        }
+                    }
                 true
             }
             R.id.menu_action_sort_Nr -> {
                 //                Toast.makeText(getActivity(), "sort Nr", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "Nr")
                 sortType = "Nr"
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, { lieder -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): sortType changed to $sortType")
-                    mAdapter!!.setListEntries(lieder)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                GlobalScope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
+                            requireActivity(),
+                            { lieder -> // Update the cached copy of the words in the adapter.
+                                Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): sortType changed to $sortType")
+                                mAdapter!!.setListEntries(lieder)
+                                // calculate Index List and show it up
+                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                                SideIndex.displayIndex(
+                                    mapIndex,
+                                    rootView,
+                                    layoutInflater,
+                                    mOnClickListener
+                                )
+                            })
+                        }
+                    }
                 true
             }
             R.id.menu_action_sort_Anlass -> {
                 //                Toast.makeText(getActivity(), "sort Thema", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "Anlass")
                 sortType = "Anlass"
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, { lieder -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): sortType changed to $sortType")
-                    mAdapter.setListEntries(lieder)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                GlobalScope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
+                            requireActivity(),
+                            { lieder -> // Update the cached copy of the words in the adapter.
+                                Log.d(
+                                    ContentValues.TAG,
+                                    "LiedFragment (onCreate: onChanged): sortType changed to $sortType"
+                                )
+                                mAdapter.setListEntries(lieder)
+                                // calculate Index List and show it up
+                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                                SideIndex.displayIndex(
+                                    mapIndex,
+                                    rootView,
+                                    layoutInflater,
+                                    mOnClickListener
+                                )
+                            })
+                        }
+                    }
                 true
             }
             R.id.menu_action_ueber -> {

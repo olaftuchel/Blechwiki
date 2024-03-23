@@ -17,19 +17,18 @@ class SimpleFragmentPagerAdapter(private val mContext: Context, fm: FragmentMana
         return if (position == 0) {
             Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: LiedFragment selected")
             LiedFragment()
-        } else {
-//        } else if (position == 1) {
+        } else if (position == 1) {
             Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: BuchFragment selected")
             BuchFragment()
-        }
+        } else {
 /*
        Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: TitelFragment selected")
             TitelFragment()
         } else {
+*/
             Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: other selected")
             KomponistFragment()
         }
-*/
     }
 
     // This determines the number of tabs

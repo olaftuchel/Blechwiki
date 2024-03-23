@@ -1,48 +1,71 @@
 package org.redderei.Blechwiki
 
+import android.app.SearchManager
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.content.res.Configuration
+import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ListView
+import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.KomponistClass
-import org.redderei.Blechwiki.repository.BlechViewModel
+import org.redderei.Blechwiki.repository.KomponistViewModel
 import org.redderei.Blechwiki.adapter.KomponistAdapter
+import org.redderei.Blechwiki.util.RecyclerTouchListener
+import org.redderei.Blechwiki.util.SideIndex
 
 /**
  * A simple [Fragment] subclass.
  */
-class KomponistFragment : Fragment() {
-//class KomponistFragment : Fragment(), View.OnClickListener {
+class KomponistFragment : Fragment(), View.OnClickListener {
     var mKomponistList: List<KomponistClass> = ArrayList()
     private lateinit var mAdapter: KomponistAdapter
-    private val mActivity: MainActivity? = null
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
     private lateinit var rootView: View
     private val mDualPane = false
     private var mActivatedPosition = ListView.INVALID_POSITION
     private val index: String? = null
-    private var blechViewModel: BlechViewModel? = null
-/*
+    private var komponistViewModel: KomponistViewModel? = null
+
     companion object {
         private const val STATE_ACTIVATED_POSITION = "activated_position"
     }
 
-    fun onUpdate(mKomponistList: List<*>?) {}
+//    fun onUpdate(mKomponistList: List<*>?) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(ContentValues.TAG, "KomponistFragment (onCreate): savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = KomponistAdapter(mKomponistList)
-        blechViewModel = ViewModelProvider(this).get(BlechViewModel::class.java)
-        blechViewModel!!.getAllKomponist("")?.observe(this, { komponist -> // Update the cached copy of the words in the adapter.
-            Log.d(ContentValues.TAG, "KomponistFragment (onCreate: onChanged): mAdapter changed ")
-            mAdapter!!.setListEntries(komponist)
-            // calculate Index List and show it up
-            mapIndex = SideIndex.getKomponistIndexList(mAdapter!!)
-            SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-        })
+
+        komponistViewModel = ViewModelProvider(this).get(KomponistViewModel::class.java)
+        GlobalScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                komponistViewModel!!.getAllKomponist("0")?.observe(appContext, { komponist -> // Update the cached copy of the words in the adapter.
+                    Log.d(ContentValues.TAG, "KomponistFragment (onCreate: onChanged): mAdapter changed ")
+                    mAdapter!!.setListEntries(komponist)
+                    // calculate Index List and show it up
+                    mapIndex = SideIndex.getKomponistIndexList(mAdapter!!)
+                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                })
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,9 +98,10 @@ class KomponistFragment : Fragment() {
         return rootView
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "KomponistFragment (onActivityCreated)")
+        Log.d(ContentValues.TAG, "KomponistFragment (onActivityCreated), savedInstanceState=$savedInstanceState")
 
 //        // 4. Access the ListView
 //        mKomponistListView = getListView();
@@ -130,6 +154,7 @@ class KomponistFragment : Fragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         //if (menu.size() == 0)
         run {
@@ -166,6 +191,7 @@ class KomponistFragment : Fragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(ContentValues.TAG, "KomponistFragment (onOptionsItemSelected)")
         return when (item.itemId) {
@@ -248,5 +274,4 @@ class KomponistFragment : Fragment() {
         super.onDetach()
         Log.d(ContentValues.TAG, "KomponistFragment (onDetach)")
     }
- */
 }

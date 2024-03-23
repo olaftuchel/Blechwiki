@@ -7,9 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.*
-import org.redderei.Blechwiki.gettersetter.AutoNrClass
 import org.redderei.Blechwiki.gettersetter.Constant
-import org.redderei.Blechwiki.gettersetter.LiedClass
 import org.redderei.Blechwiki.gettersetter.BuchClass
 import org.redderei.Blechwiki.gettersetter.KomponistClass
 import org.redderei.Blechwiki.gettersetter.TitelClass
@@ -22,76 +20,18 @@ import retrofit2.Response
 
 class BlechRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
-    private val i = 0
     val sharedPreference: SharedPreference = SharedPreference(appContext)
 
-/*
-    // Room executes all queries on a separate thread.
-    // Observed LiveData will notify the observer when the data has changed.
-    fun getAllLieder(mKirche: String, sortType: String, query: String): LiveData<List<LiedClass>>? {
-
-        Log.d(
-            ContentValues.TAG,
-            "BlechRepository (getAllLieder) mKirche=$mKirche sortType=$sortType"
-        )
-//        refreshLieder()
-        Log.d(ContentValues.TAG, "BlechRepository (getAllLieder) sortType=$sortType ")
-        return when (sortType) {
-            "ABC" -> {
-                mBlechDao.getAllLiederSortABC(mKirche, query)
-            }
-            "Nr" -> {
-                mBlechDao.getAllLiederSortNr(mKirche, query)
-            }
-            "Anlass" -> {
-                mBlechDao.getAllLiederSortAnlass(mKirche, query)
-            }
-            else -> null
-        }
-    }
-*/
-    /** insert done in ParseResponse now
-     * // You must call this on a non-UI thread or your app will throw an exception. Room ensures
-     * // that you're not doing any long running operations on the main thread, blocking the UI.
-     * void insertLied(LiedClass lied) {
-     * i = Integer.parseInt(lied.getIx());
-     * if (i%100 == 0 )
-     * Log.v(TAG, "BlechRepository (insertLied) " + lied.getNr() + " " + lied.getLied() + " " + lied.getTeil());
-     * BlechDatabase.databaseWriteExecutor.execute(() -> {
-     * mBlechDao.insert(lied);
-     * });
-     * }
-     */
-/*
-    private fun refreshLieder() {      // fetch fresh data if nothing there yet
-        if (sharedPreference.getValueString(Constant.PREF_AUTO_NR_LIED) == 0) {
-            Log.d(ContentValues.TAG, "BlechRepository (refreshLieder): refresh data from SOAP server")
-            val clickAction = "GetEGLieder2"
-            val searchString = ""
-            // define soapTask
-            soapTask = SoapTask(context)
-            // define SoapTask.DownloadCompleteListenerLied, once defined it won't be called again
-            soapTask!!.setDownloadCompleteListener(object : SoapTask.DownloadCompleteListener {
-                override fun onUpdate(mList: List<*>?) {
-                    if (soapTask!!.isCancelled) {
-                        Toast.makeText(context, "BlechRepository(refreshLieder): Network Error", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
-            // execute soapTask
-            soapTask!!.execute(clickAction, searchString, mBlechDao, mList)
-            Log.d(ContentValues.TAG, "refreshLieder: ..... changed mList to List<TypeVariable> mList, might fail!!!")
-        }
-    }
-*/
-
     suspend fun getAllBuch(query: String): LiveData<List<BuchClass>>? {
-        Log.d(TAG, "BlechRepository (getAllBuch): sharedPreference AutoNrBuch=" +
+        Log.d(TAG, "BlechRepository (getAllBuch): $(query), sharedPreference AutoNrBuch=" +
                 "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}, StoreVars.autoNrBuch=${StoreVars.instance.autoNrBuch}")
+
+        // no data there yet or part of it missing
         if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) < StoreVars.instance.autoNrBuch) {
             Log.d(TAG, "BlechRepository (getAllBuch): refresh data from REST server")
-            val restBlechwiki = ServiceBuilder.buildService(GetRestBlechwiki::class.java)
-            val call = restBlechwiki.search("Buch&counter=0")
+            val destinationService = ServiceBuilder.buildService(RestGetBuchList::class.java)
+            //ApiInterface.RestGetBuchList interface
+            val call = destinationService.getBuchList()
             call.enqueue(object : Callback<List<BuchClass>> {
                 override fun onResponse(
                     call: Call<List<BuchClass>>,
@@ -100,19 +40,15 @@ class BlechRepository internal constructor(app: Application) {
                     Log.d(TAG, "BlechRepository (getAllBuch) onResponse: we got ${restResponse.body()}")
                     if (restResponse.isSuccessful) {
                         Log.d(TAG, "Response: Buch size : ${restResponse.body()?.size}")
-                        //                       ParseResponse.buch(restResponse, clickAction)
 //                        restResponse.body()?.forEach{insertBuch(it)}
 //                        val tableListinsert: List<BuchClass> = restResponse.filter{it.change == "new" }    // .filter{it.change == "new"}
                         val tableListinsert: List<BuchClass>? = restResponse.body()
                         GlobalScope.launch { tableListinsert?.forEach { insertBuch(it) } }
                         sharedPreference.save(Constant.PREF_AUTO_NR_BUCH, StoreVars.instance.autoNrBuch)
                     } else {
-                        Log.d(
-                            TAG,
-                            "BlechRepository (getAllBuch) onResponse: no success in retrieving data, ${restResponse.message()}"
-                        )
+                        Log.d(TAG, "BlechRepository (getAllBuch) onResponse: no success in retrieving data, ${restResponse.message()}")
                         Toast.makeText(
-                            appContext, "BlechRepository(getAllBuch)onResponse: no success in retrieving data, ${restResponse.message()}",
+                            appContext, "BlechRepository(getAllBuch) onResponse: no success in retrieving data, ${restResponse.message()}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -128,16 +64,16 @@ class BlechRepository internal constructor(app: Application) {
                 }
             })
         }
-        Log.d(TAG, "BlechRepository: retrieve Bücher")
+        Log.d(TAG, "BlechRepository: will start to fetch Bücher soon")
         return mBlechDao.getAllBuecher(query)
     }
 
     suspend fun insertBuch(buch: BuchClass) {
-        Log.v(TAG, "BlechRepository (insertBuch) " + buch.Buch);
+        Log.v(TAG, "BlechRepository (insertBuch) " + buch.buch);
         mBlechDao.insert(buch);
     }
 
-    fun getChangeBuch(changeCounter: Int) {
+    suspend fun getChangeBuch(changeCounter: Int) {
         Log.d(TAG, "BlechRepository (getChangeBuch)")
         val restBlechwiki = ServiceBuilder.buildService(GetRestBlechwiki::class.java)
         val call = restBlechwiki.search("RestBlechWiki/api/Buch&counter=${changeCounter}")

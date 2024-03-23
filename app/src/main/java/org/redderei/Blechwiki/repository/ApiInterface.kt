@@ -12,6 +12,11 @@ interface RestGetAutoNr {
     fun getAutoNr () : Call<AutoNrClass>
 }
 
+interface RestGetLiedList {
+    @GET("Version?Tabelle=Lied&counter=0")
+    fun getLiedList () : Call<List<LiedClass>>
+}
+
 interface RestGetBuchList {
     @GET("Version?Tabelle=Buch&counter=0")
     fun getBuchList () : Call<List<BuchClass>>

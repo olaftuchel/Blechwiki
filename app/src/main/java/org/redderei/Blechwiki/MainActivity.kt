@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-//import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
@@ -16,8 +15,6 @@ import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.repository.BlechViewModel
 import org.redderei.Blechwiki.util.SharedPreference
 import androidx.lifecycle.*
-import org.redderei.Blechwiki.repository.AutoNrViewModel
-import org.redderei.posaunote.R
 
 
 /**Features
@@ -49,11 +46,6 @@ class MainActivity : AppCompatActivity() {
 
         // Create an adapter that knows which fragment should be shown on each page
         val adapter = SimpleFragmentPagerAdapter(applicationContext, supportFragmentManager)
-
-        // Create the Repository (just once)
-        val autoNrViewModel = ViewModelProvider(this).get(AutoNrViewModel::class.java)
-
-        autoNrViewModel.getLastNr
 
         // Set the adapter onto the view pager
         viewPager.adapter = adapter

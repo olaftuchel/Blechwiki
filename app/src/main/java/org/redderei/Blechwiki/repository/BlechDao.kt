@@ -98,6 +98,6 @@ interface BlechDao {
     @Query("SELECT MAX(changecounter) AS max_changecounter FROM titel_table")
     fun getMaxChangecounterTitel(): Int
 
-    @Query("SELECT MAX(buch_id) AS max_maxbuchid FROM buch_table")
+    @Query("SELECT MAX(buchId) AS max_maxbuchid FROM buch_table")
     fun getMaxBuchId(): Int
 }

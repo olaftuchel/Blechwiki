@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "org.redderei.posaunote"
+    namespace = "org.redderei.Blechwiki"
     compileSdk = 34
     room { schemaDirectory(path = "$projectDir/schemas") }
     defaultConfig {

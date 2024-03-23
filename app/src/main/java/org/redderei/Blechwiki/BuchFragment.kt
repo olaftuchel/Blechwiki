@@ -27,7 +27,6 @@ import org.redderei.Blechwiki.gettersetter.BuchClass
 import org.redderei.Blechwiki.repository.BlechViewModel
 import org.redderei.Blechwiki.util.RecyclerTouchListener
 import org.redderei.Blechwiki.util.SideIndex
-import org.redderei.posaunote.R
 
 /**
  * A simple [Fragment] subclass.
@@ -51,6 +50,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
         Log.d(ContentValues.TAG, "BuchFragment (onCreate): savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = BuchAdapter(mBuchList)
+
         blechViewModel = ViewModelProvider(this).get(BlechViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
@@ -94,13 +94,13 @@ class BuchFragment : Fragment(), View.OnClickListener {
                 Log.v(ContentValues.TAG, "BuchFragment (onCreateView): onLongClick")
                 // Toast.makeText(mActivity, "OnLongClick position=" + position, Toast.LENGTH_SHORT).show();
                 val detailIntent = Intent(activity, BuchDetailActivity::class.java)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mBuchList[position].Buch)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mBuchList[position].Untertitel)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mBuchList[position].Erscheinjahr)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mBuchList[position].Herausgeber)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mBuchList[position].Herausg_vorname)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mBuchList[position].Verlag)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mBuchList[position].Verlagsnummer)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mBuchList[position].buch)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mBuchList[position].untertitel)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mBuchList[position].erscheinjahr)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mBuchList[position].herausgeber)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mBuchList[position].herausg_vorname)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mBuchList[position].verlag)
+                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mBuchList[position].verlagsnummer)
 //                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, mAdapter!!.mBuchList[position].imgUrl)
 // without content of imgUrl
                 detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, "https://de.wikipedia.org/wiki/Buch#/media/Datei:Bibel-1.jpg")
@@ -142,8 +142,8 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     fun onMyItemClick(position: Int) {
         Log.d(ContentValues.TAG, "BuchFragment (onListItemClick) position=$position")
-        val idString = mAdapter!!.mBuchList[position].BuchId.toString()
-        val longName = mAdapter!!.mBuchList[position].Buch
+        val idString = mAdapter!!.mBuchList[position].buchId.toString()
+        val longName = mAdapter!!.mBuchList[position].buch
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a

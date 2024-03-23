@@ -62,7 +62,7 @@ object SideIndex {
         val mapIndex: MutableMap<String, Int> = LinkedHashMap<String, Int>()
         if (mAdapter.mBuchList.isNotEmpty()) {
             for (i: Int in mAdapter.mBuchList.indices) {
-                indexChar = mAdapter.mBuchList[i].Buch.substring(0, 1).toUpperCase()
+                indexChar = mAdapter.mBuchList[i].buch.substring(0, 1).toUpperCase()
                 if (indexChar!!.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
             }
         }

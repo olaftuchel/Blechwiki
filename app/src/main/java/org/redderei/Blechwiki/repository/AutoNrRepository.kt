@@ -26,7 +26,8 @@ class AutoNrRepository internal constructor(app: Application) {
             new start with changes in web   sharedPref = lastNr  < StoreVars
          */
         get() {
-            if (!sharedPreference.getValueBoolean(Constant.PREF_INITIALIZED, false)) {          // app didn't store preferences so far, initialize them
+            // app didn't store preferences so far, initialize them
+            if (!sharedPreference.getValueBoolean(Constant.PREF_INITIALIZED, false)) {
                 Log.v(ContentValues.TAG, "AutoNrRepository (getGetAutoNr) runs first time on machine")
                 // Values not initialized so far
                 sharedPreference.save(Constant.PREF_SORTTYPE, "ABC")
@@ -41,7 +42,8 @@ class AutoNrRepository internal constructor(app: Application) {
                     Log.v(ContentValues.TAG, "AutoNrRepository (getGetAutoNr) runs again on machine, " +
                             "compare local data serial PrefAutoNrBuch=" + sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) +
                             " StoreVars.instance.autoNrBuch" + StoreVars.instance.autoNrBuch)
-                    val destinationService = ServiceBuilder.buildService(RestGetAutoNr::class.java)             //ApiInterface.RestGetAutoNr interface
+                    val destinationService = ServiceBuilder.buildService(RestGetAutoNr::class.java)
+                    //ApiInterface.RestGetAutoNr interface
                     val call = destinationService.getAutoNr()
                     // make network call asynchronously, read three values latest getGetAutoNr from Web
                     call.enqueue(object : Callback<AutoNrClass> {

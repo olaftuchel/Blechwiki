@@ -26,7 +26,7 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
         var detailTextView1: TextView
         var detailTextView2: TextView
         fun bind(item: BuchClass) {
-            titleTextView.text = item.Buch
+            titleTextView.text = item.buch
         }
 
         init {

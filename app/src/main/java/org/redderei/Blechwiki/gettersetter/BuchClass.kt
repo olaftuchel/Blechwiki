@@ -11,20 +11,21 @@ import androidx.room.PrimaryKey
 @Entity(tableName = Constant.TABLE_BUCH)
 class BuchClass(
     @PrimaryKey(autoGenerate = true) val uid: Int?,
-    @ColumnInfo(name = Constant.BUCHID) var BuchId: String,
-    @ColumnInfo(name = Constant.BUCHKURZ) var Buchkurz: String,
-    @ColumnInfo(name = Constant.BUCH) var Buch: String,
-    @ColumnInfo(name = Constant.UNTERTITEL) var Untertitel: String,
-    @ColumnInfo(name = Constant.ERSCHEINJAHR) var Erscheinjahr: String,
-    @ColumnInfo(name = Constant.HERAUSGEBER) var Herausgeber: String,
-    @ColumnInfo(name = Constant.HERAUSG_VORNAME) var Herausg_vorname: String,
-    @ColumnInfo(name = Constant.VERLAG) var Verlag: String,
-    @ColumnInfo(name = Constant.VERLAGSNUMMER) var Verlagsnummer: String,
-    @ColumnInfo(name = Constant.ZULIEFERUNG) var Zulieferung: String,
-    @ColumnInfo(name = Constant.RELEVANZ) var Relevanz: String,
+    // name in SQL table: Constant.BUCHID, buchId: name in JSON response
+    @ColumnInfo(name = Constant.BUCHID) var buchId: String,
+    @ColumnInfo(name = Constant.BUCHKURZ) var buchkurz: String,
+    @ColumnInfo(name = Constant.BUCH) var buch: String,
+    @ColumnInfo(name = Constant.UNTERTITEL) var untertitel: String?,
+    @ColumnInfo(name = Constant.ERSCHEINJAHR) var erscheinjahr: String?,
+    @ColumnInfo(name = Constant.HERAUSGEBER) var herausgeber: String?,
+    @ColumnInfo(name = Constant.HERAUSG_VORNAME) var herausg_vorname: String?,
+    @ColumnInfo(name = Constant.VERLAG) var verlag: String?,
+    @ColumnInfo(name = Constant.VERLAGSNUMMER) var verlagsnummer: String?,
+    @ColumnInfo(name = Constant.ZULIEFERUNG) var zulieferung: String?,
+    @ColumnInfo(name = Constant.RELEVANZ) var relevanz: Int,
     @ColumnInfo(name = Constant.VORHANDEN) var vorhanden: String,
 //     @ColumnInfo(name = Constant.IMGURL) var imgUrl: String,
-    @ColumnInfo(name = Constant.CHANGECOUNTER) var changecounter: String,
+    @ColumnInfo(name = Constant.CHANGECOUNTER) var changecounter: Int,
     @ColumnInfo(name = Constant.CHANGE) var change: String
     )
 
