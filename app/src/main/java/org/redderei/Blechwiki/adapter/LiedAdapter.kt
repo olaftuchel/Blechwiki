@@ -39,7 +39,7 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LiedViewHolder {
-        // Log.v(TAG, "LiedAdapter (onCreateViewHolder)");
+        // Log.v("LiedAdapter", "onCreateViewHolder");
         // create a new view
         val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.list_lied, parent, false)
@@ -48,7 +48,7 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
     }
 
     override fun onBindViewHolder(holder: LiedViewHolder, position: Int) {
-        // Log.v(TAG, "LiedAdapter (onBindViewHolder)");
+        // Log.v("LiedAdapter", "onBindViewHolder");
         holder.titleTextView.text = mLiedList[position].lied
         //            holder.subtitleTextView.setText(mLiedList.get(position).getTeil());
         holder.detailTextView.text = mLiedList[position].nr
@@ -62,18 +62,18 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
     }
 
     fun setListEntries(mList: List<LiedClass>) {
-        Log.d(ContentValues.TAG, "LiedAdapter (setListEntries)")
+        Log.d("LiedAdapter", "setListEntries")
         mLiedList = mList
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-//        Log.d(TAG, "LiedAdapter (getItemCount)");
+//        Log.d("LiedAdapter", "getItemCount");
         return mLiedList.size
     }
 
     override fun getFilter(): Filter {
-        Log.d(ContentValues.TAG, "LiedAdapter (getFilter)")
+        Log.d("LiedAdapter", "getFilter")
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 val charString = charSequence.toString()
@@ -89,7 +89,7 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
                     for (row in mLiedList) {
                         // name match condition. this might differ depending on your requirement
                         // here we are looking for name or phone number match
-                        if (row.lied.toLowerCase(Locale.getDefault()).contains(charString)) {
+                        if (row.lied.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }

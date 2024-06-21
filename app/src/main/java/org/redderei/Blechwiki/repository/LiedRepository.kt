@@ -6,13 +6,16 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.redderei.Blechwiki.gettersetter.LiedClass
 import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
+import org.redderei.Blechwiki.gettersetter.BuchClass
 import org.redderei.Blechwiki.gettersetter.Constant
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 import org.redderei.Blechwiki.util.SharedPreference
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,41 +35,46 @@ class LiedRepository internal constructor(app: Application) {
 
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
-    suspend fun getAllLieder(mKirche: String, sortType: String, query: String): LiveData<List<LiedClass>>? {
+    fun getAllLieder(mKirche: String, sortType: String, query: String): LiveData<List<LiedClass>>? {
 
-        Log.d(ContentValues.TAG, "LiedRepository (getAllLieder) mKirche=${mKirche} sortType=${sortType} query=${query}" +
-            " sharedPreference AutoNrBuch=" + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}, StoreVars.autoNrBuch=${StoreVars.instance.autoNrBuch}")
-/*
+        Log.d("LiedRepository", "getAllLieder: mKirche=${mKirche} sortType=${sortType} query=${query}" +
+            " sharedPreference AutoNrLied=" + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_LIED)}, StoreVars.autoNrLied=${StoreVars.instance.autoNrLied}")
+
         // no data there yet or part of it missing
-        if (!sharedPreference.getValueBoolean(Constant.PREF_INITIALIZED, false)) {
-            Log.d(TAG, "LiedRepository (getAllLieder): refresh data from REST server")
-            val destinationService = ServiceBuilder.buildService(RestGetLiedList::class.java)
-            //ApiInterface.RestGetBuchList interface
+        if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_LIED) < StoreVars.instance.autoNrLied) {
+            Log.d("LiedRepository", "getAllLieder: refresh data from REST server")
+
+            val destinationService = ServiceBuilder.buildService(RestInterface::class.java)
             val call = destinationService.getLiedList()
             call.enqueue(object : Callback<List<LiedClass>> {
                 override fun onResponse(
                     call: Call<List<LiedClass>>,
                     restResponse: Response<List<LiedClass>>
                 ) {
-                    Log.d(TAG, "LiedRepository (getAllLieder) onResponse: we got ${restResponse.body()}")
+                    Log.d("LiedRepository", "getAllLieder: onResponse, we got ${restResponse.body()}")
                     if (restResponse.isSuccessful) {
-                        Log.d(TAG, "Response: Lieder size : ${restResponse.body()?.size}")
-//                        restResponse.body()?.forEach{insertBuch(it)}
-//                        val tableListinsert: List<LiedClass> = restResponse.filter{it.change == "new" }    // .filter{it.change == "new"}
-                        val tableListinsert: List<LiedClass>? = restResponse.body()
-                        GlobalScope.launch { tableListinsert?.forEach { insertLied(it) } }
-                        sharedPreference.save(Constant.PREF_AUTO_NR_LIED, StoreVars.instance.autoNrLied)
+                        Log.d(TAG, "Response: Lieder size : ${restResponse.body()!!.size}")
+                        if (restResponse.body()!!.isNotEmpty()) {
+                            val tableListinsert: List<LiedClass> = restResponse.body()!!
+                            GlobalScope.launch { insertAllLied(tableListinsert) }
+                            sharedPreference.save(
+                                Constant.PREF_AUTO_NR_LIED,
+                                StoreVars.instance.autoNrLied
+                            )
+                            Log.d("LiedRepository", "getAllLied: onResponse, saved Constant.PREF_AUTO_NR_LIED = StoreVars.instance.autoNrLied = ${StoreVars.instance.autoNrLied}")
+
+                        }
                     } else {
-                        Log.d(TAG, "LiedRepository (getAllLied) onResponse: no success in retrieving data, ${restResponse.message()}")
+                        Log.d("LiedRepository", "getAllLied: onResponse, no success in retrieving data, ${restResponse.message()}")
                         Toast.makeText(
-                            appContext, "LiedRepository(getAllLied) onResponse: no success in retrieving data, ${restResponse.message()}",
+                            appContext, "LiedRepository(getAllLied) onResponse, no success in retrieving data, ${restResponse.message()}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
 
                 override fun onFailure(call: Call<List<LiedClass>>, t: Throwable) {
-                    Log.d("LiedRepository (getAllLied): onFailure", "Something went wrong $t")
+                    Log.d("LiedRepository", "getAllLied: onFailure, Something went wrong $t")
                     Toast.makeText(
                         appContext,
                         "LiedRepository (getAllLied): Error $t",
@@ -74,56 +82,73 @@ class LiedRepository internal constructor(app: Application) {
                     ).show()
                 }
             })
-
         }
-*/
-//        refreshLieder()
 
+        Log.d("LiedRepository", "try to fetch Lied from BlechDao, sorttype= ${sortType}")
         return when (sortType) {
             "ABC" -> {
-                mBlechDao.getAllLiederSortABC(mKirche, query)
+                mBlechDao.getAllLiedSortABC(mKirche, query)
             }
             "Nr" -> {
-                mBlechDao.getAllLiederSortNr(mKirche, query)
+                mBlechDao.getAllLiedSortNr(mKirche, query)
             }
             "Anlass" -> {
-                mBlechDao.getAllLiederSortAnlass(mKirche, query)
+                mBlechDao.getAllLiedSortAnlass(mKirche, query)
             }
             else -> null
         }
     }
 
+    fun getLiedDetails(liedNr: Int): MutableLiveData<List<TitelInBuchClass>> {
+        // returns nothing as it sets LiveData<List<TitelInBuchClass>>
+        val tableListinsert = MutableLiveData<List<TitelInBuchClass>>() // = emptyList()
+        Log.v("LiedRepository", "getLiedDetails " + liedNr);
+
+        val destinationService = ServiceBuilder.buildService(RestInterface::class.java)
+        val call = destinationService.getLiedDetails(liedNr)
+        call.enqueue(object : Callback<List<TitelInBuchClass>> {
+            override fun onResponse(
+                call: Call<List<TitelInBuchClass>>,
+                restResponse: Response<List<TitelInBuchClass>>
+            ) {
+                Log.d("LiedRepository", "getLiedDetails onResponse: we got ${restResponse.body()}")
+                if (restResponse.isSuccessful) {
+                    Log.d("LiedRepository", "Response: Bücher size : ${restResponse.body()!!.size}")
+                    if (restResponse.body()!!.isNotEmpty()) {
+                        tableListinsert.value = restResponse.body()!!
+                        Log.d("LiedRepository", "getLiedDetails onResponse: saved Constant.PREF_AUTO_NR_LIED = StoreVars.instance.autoNrLied = ${StoreVars.instance.autoNrLied}")
+
+                    }
+                } else {
+                    Log.d("LiedRepository", "getLiedDetails onResponse: no success in retrieving data, ${restResponse.message()}")
+                    Toast.makeText(
+                        appContext, "LiedRepository, getLiedDetails onResponse: no success in retrieving data, ${restResponse.message()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<TitelInBuchClass>>, t: Throwable) {
+                Log.d("LiedRepository (getLiedDetails): onFailure", "Something went wrong, ERROR: $t")
+                Toast.makeText(appContext, "LiedRepository (getLiedDetails): Error $t", Toast.LENGTH_SHORT).show()
+            }
+        })
+        return tableListinsert
+    }
+
     suspend fun insertLied(lied: LiedClass) {
-        Log.v(TAG, "LiedRepository (insertLied) " + lied.lied);
+        Log.v("LiedRepository", "insertLied " + lied.lied);
         mBlechDao.insert(lied);
     }
 
-/*
-    suspend fun refreshLieder() {      // fetch fresh data if nothing there yet
-        if (sharedPreference.getValueString(Constant.PREF_AUTO_NR_LIED) == 0) {
-            Log.d(ContentValues.TAG, "LiedRepository (refreshLieder): refresh data from SOAP server")
-            val clickAction = "GetEGLieder2"
-            val searchString = ""
-            // define soapTask
-            soapTask = SoapTask(context)
-            // define SoapTask.DownloadCompleteListenerLied, once defined it won't be called again
-            soapTask!!.setDownloadCompleteListener(object : SoapTask.DownloadCompleteListener {
-                override fun onUpdate(mList: List<*>?) {
-                    if (soapTask!!.isCancelled) {
-                        Toast.makeText(context, "LiedRepository(refreshLieder): Network Error", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
-            // execute soapTask
-            soapTask!!.execute(clickAction, searchString, mBlechDao, mList)
-            Log.d(ContentValues.TAG, "refreshLieder: ..... changed mList to List<TypeVariable> mList, might fail!!!")
-        }
+    suspend fun insertAllLied(liedList: List<LiedClass>) {
+        Log.v("LiedRepository", "insertAllLied" + liedList.size);
+        mBlechDao.insertAllLied(liedList);
     }
-*/
 
     init {
         // initialize database connection
-        Log.d(ContentValues.TAG, "LiedRepository (init)")
+        Log.d("LiedRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
 
@@ -131,11 +156,8 @@ class LiedRepository internal constructor(app: Application) {
         if (StoreVars.instance.autoNrBuch == 0) {
             val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
             autoNrViewModel.getAutoNr
-            Log.d(ContentValues.TAG, "LiedRepository (init): autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
+            Log.d("LiedRepository", "init: StoreVars, autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
         }
     }
 }
 
-//private fun <T> Call<T>.enqueue(callback: Callback<List<LiedClass>>) {
-//    Log.d(TAG, "callback enqueue, what happens???????????????????????????????")
-//}

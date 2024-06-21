@@ -11,10 +11,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = Constant.TABLE_LIED)
 class LiedClass(// "Abend ward, bald kommt die Nacht"
     @PrimaryKey(autoGenerate = true) val uid: Int?,
+    // name in SQL table: Constant.LIED, lied: name in JSON response
     @ColumnInfo(name = Constant.LIED) var lied: String, // "2"
     @ColumnInfo(name = Constant.IX) var ix: String, // "2"
     @ColumnInfo(name = Constant.IXUR) var ixUr: String, // "Stamm"
-    @ColumnInfo(name = Constant.TEIL) var teil: String, // "487"
-    @ColumnInfo(name = Constant.NR) var nr: String, // "Abend"
-    @ColumnInfo(name = Constant.ANLASS) var anlass: String
+    @ColumnInfo(name = Constant.TEIL) var egTeil: String, // "BEL"
+    @ColumnInfo(name = Constant.NR) var nr: String, // "487"
+    @ColumnInfo(name = Constant.ANLASS) var anlass: String // "Abend"
     )

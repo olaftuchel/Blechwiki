@@ -10,10 +10,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = Constant.TABLE_KOMPONIST)
 class KomponistClass(
     @PrimaryKey(autoGenerate = true) val uid: Int?,
-    @ColumnInfo(name = Constant.ID) val Id: Long,
+    // name in SQL table: Constant.ID, id: name in JSON response
+    @ColumnInfo(name = Constant.ID) val id: Long,
     @ColumnInfo(name = Constant.KURZ) var kurz: String,
-    @ColumnInfo(name = Constant.KOMPONIST) var Komponist: String,
-    @ColumnInfo(name = Constant.FRIENDLYKOMPONISTNAME) var FriendlyKomponistName: String,
+    @ColumnInfo(name = Constant.KOMPONIST) var komponist: String,
+    @ColumnInfo(name = Constant.FRIENDLYKOMPONISTNAME) var friendlyKomponistName: String?,
     @ColumnInfo(name = Constant.CHANGECOUNTER) var changecounter: Int,
     @ColumnInfo(name = Constant.CHANGE) var change: String
     )

@@ -15,14 +15,14 @@ class AutoNrViewModel(app: Application) : AndroidViewModel(app) {
 
     val getAutoNr: Unit
         get() {
-            Log.d(ContentValues.TAG, "AutoNrViewModel (getGetAutoNr)")
+            Log.d("AutoNrViewModel", "getGetAutoNr")
             mRepository.getAutoNr
             return
         }
 
     val getLastNr: Unit
         get() {
-            Log.d(ContentValues.TAG, "AutoNrViewModel (getLastNr)")
+            Log.d("AutoNrViewModel", "getLastNr")
             mRepository.getLastNr
             return
         }
@@ -35,16 +35,7 @@ class AutoNrViewModel(app: Application) : AndroidViewModel(app) {
     //   the UI when the data actually changes.
     // - Repository is completely separated from the UI through the ViewModel.
     init {
-        Log.d(ContentValues.TAG, "AutoNrViewModel (init)")
-        /*if (mRepository?.tag == "mReository") {
-            Log.d (ContentValues.TAG, "mRepository is: $mRepository")
-        }
-        when (mRepository) {
-            is Int -> Log.d (ContentValues.TAG, "mRepository is Int: $mRepository")
-            is String -> Log.d (ContentValues.TAG, "mRepository is String : $mRepository.length")
-            is IntArray -> Log.d (ContentValues.TAG, "mRepository is : $mRepository.sum()")
-        }
-         */
+        Log.d("AutoNrViewModel", "init")
         mRepository = AutoNrRepository(app)
     }
 

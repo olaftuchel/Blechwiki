@@ -6,7 +6,7 @@ import android.util.Log
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import com.google.android.exoplayer2.ui.PlayerView
+//import com.google.android.exoplayer2.ui.PlayerView
 import org.redderei.Blechwiki.R
 
 
@@ -85,7 +85,7 @@ class PlayVideoFragment : Fragment() {
 
     private fun playVideo(downloadUrl: String) {
         Log.v(ContentValues.TAG, "PlayVideoFragment: playVideo")
-        val mPlayerView = requireView().findViewById<View>(R.id.video_view) as PlayerView
+//        val mPlayerView = requireView().findViewById<View>(R.id.video_view) as PlayerView
 
 
 //        mPlayerView.player = ExoPlayerManager.getSharedInstance(context).getPlayerView().getPlayer()

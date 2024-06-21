@@ -1,7 +1,6 @@
 package org.redderei.Blechwiki
 
 import android.app.SearchManager
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -17,7 +16,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,15 +37,14 @@ import org.redderei.Blechwiki.util.*
  * A simple [Fragment] subclass.
  */
 class LiedFragment : Fragment(), View.OnClickListener {
-    private val mLiedList: List<LiedClass> = ArrayList()
+    private var mLiedList: List<LiedClass> = ArrayList()
     private lateinit var mAdapter: LiedAdapter
     private var mapIndex: Map<String, Int>? = null
-    private var mKircheOld = ""
     private var mKirche = ""
+    private var sortType = ""
     private var recyclerView: RecyclerView? = null
     private lateinit var rootView: View
     private val mDualPane = false
-    private var sortType = ""
     private var liedViewModel: LiedViewModel? = null
     private val sharedPreference: SharedPreference = SharedPreference(appContext)
 
@@ -64,7 +62,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(ContentValues.TAG, "LiedFragment (onCreate) ")
+        Log.d(  "LiedFragment", "onCreate ")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = LiedAdapter(mLiedList)
         // Get a new or existing ViewModel from the ViewModelProvider.
@@ -73,24 +71,23 @@ class LiedFragment : Fragment(), View.OnClickListener {
         sortType = sharedPreference.getValueString(Constant.PREF_SORTTYPE).toString()
 
         liedViewModel = ViewModelProvider(this).get(LiedViewModel::class.java)
-//        MainActivity.appContext.blechViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(this, { lieder -> // Update the cached copy of the words in the adapter.
         // Update the cached copy of the words in the adapter.
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(appContext, {lieder ->
-                    Log.v(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
+                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(appContext) { lieder ->
+                    Log.v(  "LiedFragment", "onCreate:  mAdapter changed ")
                     mAdapter.setListEntries(lieder)
                     // calculate Index List and show it up
                     mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
                     SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                }
             }
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        Log.d(ContentValues.TAG, "LiedFragment (onCreateView): savedInstanceState=$savedInstanceState")
+        Log.d("LiedFragment", "onCreateView: savedInstanceState=$savedInstanceState")
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
@@ -122,7 +119,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
     @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "LiedFragment (onActivityCreated): savedInstanceState=$savedInstanceState")
+        Log.d("LiedFragment", "onActivityCreated: savedInstanceState=$savedInstanceState")
 
 //       // The detail container view will be present only in the
 //       // large-screen layouts (res/values-large and
@@ -140,7 +137,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     //click on side index to scroll to specific item
     override fun onClick(view: View) {
-        Log.v(ContentValues.TAG, "LiedFragment: (onClick)")
+        Log.v("LiedFragment", "onClick")
         val selectedIndex = view as TextView
 
         // scroll down to line "index"
@@ -149,8 +146,8 @@ class LiedFragment : Fragment(), View.OnClickListener {
     }
 
     ////    @Override
-    fun onMyItemClick(position: Int) {
-        Log.d(ContentValues.TAG, "LiedFragment (onMyItemClick): position=$position")
+     fun onMyItemClick(position: Int) {
+        Log.d("LiedFragment", "onMyItemClick: position=$position")
         val ixUr = mAdapter!!.mLiedList[position].ixUr
         val idString = mAdapter!!.mLiedList[position].lied
 
@@ -182,7 +179,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         //if (menu.size() == 0)
         run {
-            Log.d(ContentValues.TAG, "LiedFragment (onCreateOptionsMenu)")
+            Log.d("LiedFragment", "onCreateOptionsMenu")
             val mOnClickListener = View.OnClickListener { view: View -> this.onClick(view) }
             // Inflate the menu.
             // Adds items to the action bar if it is present.
@@ -198,13 +195,13 @@ class LiedFragment : Fragment(), View.OnClickListener {
             searchView.maxWidth = Int.MAX_VALUE
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
-                    Log.d(ContentValues.TAG, "LiedFragment (onQueryTextSubmit): " + query + "and Kirche " + mKirche)
+                    Log.d("LiedFragment", "onQueryTextSubmit: " + query + "and Kirche " + mKirche)
                     mAdapter!!.filter.filter(query)
                     return false
                 }
 
                 override fun onQueryTextChange(query: String): Boolean {
-                    Log.v(ContentValues.TAG, "LiedFragment (onQueryTextChange): filter>$query<")
+                    Log.v("LiedFragment", "onQueryTextChange: filter>$query<")
                     if (mAdapter != null) {
                         mAdapter!!.filter.filter(query) {
                             mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
@@ -218,52 +215,28 @@ class LiedFragment : Fragment(), View.OnClickListener {
     }
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(ContentValues.TAG, "LiedFragment (onOptionsItemSelected)")
+        Log.d("LiedFragment", "onOptionsItemSelected")
         val mOnClickListener: View.OnClickListener
         mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_kirche -> {
-                // see MainActivity displayWelcome for more comments
-                mKircheOld = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
-                val a = AlertDialogWithList()
-                mKirche = a.withItems(mKircheOld)
-                sharedPreference.save(Constant.PREF_KIRCHE, mKirche!!)
-                Log.v(ContentValues.TAG, "LiedFragment (onOptionsItemSelected): mKirche=$mKirche selected")
-                GlobalScope.launch(Dispatchers.IO) {
-                    withContext(Dispatchers.Main) {
-                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity(),
-                            { lieder -> // Update the cached copy of the words in the adapter.
-                                Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
-                                mAdapter!!.setListEntries(lieder)
-                                // calculate Index List and show it up
-                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                                SideIndex.displayIndex(
-                                    mapIndex,
-                                    rootView,
-                                    layoutInflater,
-                                    mOnClickListener
-                                )
-                            })
-                        }
+                // mKircheOld was intended to be marked as previous value during selection
+//                mKircheOld = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
+                //TODO the below doesn't run well, Kirche can be selected, but is passed to filtering too late
+                GlobalScope.launch(Dispatchers.Main){
+                    val mSelectChurch = SelectChurch()
+                    mSelectChurch.selectAndFilterChurch()
+                    liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
+                        requireActivity()
+                    ) { lieder -> // Update the cached copy of the words in the adapter.
+                        Log.d("LiedFragment", "onCreate: mAdapter changed ")
+                        mAdapter!!.setListEntries(lieder)
+                        // calculate Index List and show it up
+                        mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
                     }
-
-//                val p = PromptForResult()
-//                p.promptForResult(context, mKirche, p : PromptRunnable() {
-//                    override fun run() {
-//                        val mKirche = value
-//                        sharedPreference.save(Constant.PREF_KIRCHE, mKirche!!)
-//                        Log.v(ContentValues.TAG, "LiedFragment (onOptionsItemSelected): mKirche=$mKirche selected")
-//                        MainActivity.appContext.blechViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(activity!!, { lieder -> // Update the cached copy of the words in the adapter.
-//                            Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): mAdapter changed ")
-//                            mAdapter!!.setListEntries(lieder)
-//                            // calculate Index List and show it up
-//                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-//                            SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-//                        })
-//                    }
-//                })
+                }
                 true
             }
             R.id.menu_action_sort_ABC -> {
@@ -272,24 +245,20 @@ class LiedFragment : Fragment(), View.OnClickListener {
                 sortType = "ABC"
                 GlobalScope.launch(Dispatchers.IO) {
                     withContext(Dispatchers.Main) {
-                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity(),
-                            { lieder -> // Update the cached copy of the words in the adapter.
-                                Log.d(
-                                    ContentValues.TAG,
-                                    "LiedFragment (onCreate: onChanged): sortType changed to $sortType"
-                                )
-                                mAdapter!!.setListEntries(lieder)
-                                // calculate Index List and show it up
-                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                                SideIndex.displayIndex(
-                                    mapIndex,
-                                    rootView,
-                                    layoutInflater,
-                                    mOnClickListener
-                                )
-                            })
+                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(requireActivity())
+                        { lieder -> // Update the cached copy of the words in the adapter.
+                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
+                            mAdapter!!.setListEntries(lieder)
+                            // calculate Index List and show it up
+                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                            SideIndex.displayIndex(
+                                mapIndex,
+                                rootView,
+                                layoutInflater,
+                                mOnClickListener
+                            )
                         }
+                    }
                     }
                 true
             }
@@ -300,20 +269,20 @@ class LiedFragment : Fragment(), View.OnClickListener {
                 GlobalScope.launch(Dispatchers.IO) {
                     withContext(Dispatchers.Main) {
                         liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity(),
-                            { lieder -> // Update the cached copy of the words in the adapter.
-                                Log.d(ContentValues.TAG, "LiedFragment (onCreate: onChanged): sortType changed to $sortType")
-                                mAdapter!!.setListEntries(lieder)
-                                // calculate Index List and show it up
-                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                                SideIndex.displayIndex(
-                                    mapIndex,
-                                    rootView,
-                                    layoutInflater,
-                                    mOnClickListener
-                                )
-                            })
+                            requireActivity()
+                        ) { lieder -> // Update the cached copy of the words in the adapter.
+                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
+                            mAdapter!!.setListEntries(lieder)
+                            // calculate Index List and show it up
+                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                            SideIndex.displayIndex(
+                                mapIndex,
+                                rootView,
+                                layoutInflater,
+                                mOnClickListener
+                            )
                         }
+                    }
                     }
                 true
             }
@@ -324,23 +293,20 @@ class LiedFragment : Fragment(), View.OnClickListener {
                 GlobalScope.launch(Dispatchers.IO) {
                     withContext(Dispatchers.Main) {
                         liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity(),
-                            { lieder -> // Update the cached copy of the words in the adapter.
-                                Log.d(
-                                    ContentValues.TAG,
-                                    "LiedFragment (onCreate: onChanged): sortType changed to $sortType"
-                                )
-                                mAdapter.setListEntries(lieder)
-                                // calculate Index List and show it up
-                                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                                SideIndex.displayIndex(
-                                    mapIndex,
-                                    rootView,
-                                    layoutInflater,
-                                    mOnClickListener
-                                )
-                            })
+                            requireActivity()
+                        ) { lieder -> // Update the cached copy of the words in the adapter.
+                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
+                            mAdapter.setListEntries(lieder)
+                            // calculate Index List and show it up
+                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                            SideIndex.displayIndex(
+                                mapIndex,
+                                rootView,
+                                layoutInflater,
+                                mOnClickListener
+                            )
                         }
+                    }
                     }
                 true
             }
@@ -356,7 +322,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d(ContentValues.TAG, "LiedFragment (onSaveInstanceState)")
+        Log.d("LiedFragment", "onSaveInstanceState")
         if (mActivatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition)
@@ -365,12 +331,12 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        Log.d(ContentValues.TAG, "LiedFragment (onConfigurationChanged)")
+        Log.d(  "LiedFragment","onConfigurationChanged")
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Log.v(ContentValues.TAG, "LiedFragment: onConfigurationChanged: landscape")
+            Log.v("LiedFragment", "onConfigurationChanged: landscape")
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.v(ContentValues.TAG, "LiedFragment: onConfigurationChanged: portrait")
+            Log.v("LiedFragment", "onConfigurationChanged: portrait")
         }
     }
     // https://mobikul.com/how-to-make-master-details-layout-for-small-mobile-devices/
@@ -383,7 +349,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setActivatedPosition(position: Int) {
-        Log.d(ContentValues.TAG, "LiedFragment (setActivatedPosition): position=$position")
+        Log.d("LiedFragment","setActivatedPosition: position=$position")
         //        if (position == ListView.INVALID_POSITION) {
 //            getListView().setItemChecked(mActivatedPosition, false);
 //        } else {
@@ -394,41 +360,41 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        Log.d(ContentValues.TAG, "LiedFragment (onAttach)")
+        Log.d("LiedFragment", "onAttach")
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d(ContentValues.TAG, "LiedFragment (onStart)")
+        Log.d("LiedFragment", "onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(ContentValues.TAG, "LiedFragment (onResume)")
+        Log.d("LiedFragment", "onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "LiedFragment (onPause)")
+        Log.d("LiedFragment", "onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(ContentValues.TAG, "LiedFragment (onStop)")
+        Log.d("LiedFragment", "onStop")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(ContentValues.TAG, "LiedFragment (onDestroyView)")
+        Log.d("LiedFragment", "onDestroyView")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(ContentValues.TAG, "LiedFragment (onDestroy)")
+        Log.d("LiedFragment", "onDestroy")
     }
 
     override fun onDetach() {
         super.onDetach()
-        Log.d(ContentValues.TAG, "LiedFragment (onDetach)")
+        Log.d("LiedFragment", "onDetach")
     }
 }

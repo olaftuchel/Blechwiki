@@ -1,7 +1,9 @@
 package org.redderei.Blechwiki
 
+import android.content.ContentValues
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 
 /**
  * Created by ot775x on 23.05.2018.
@@ -18,8 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
  */
 class ActivityDetail : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*
-        Log.v(ContentValues.TAG, "ActivityDetail: onCreate")
+
+        Log.d("ActivityDetail", "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_container)
 
@@ -41,6 +43,7 @@ class ActivityDetail : AppCompatActivity() {
             // using a fragment transaction.
             val arguments = Bundle()
             val callingFragment = intent.getStringExtra("CALLING_FRAGMENT")
+            Log.d("ActivityDetail", "onCreate -> " + callingFragment)
             when (callingFragment) {
                 "LiedFragment" -> {
                     val ixUr = intent.getStringExtra(FundstellenLiedFragment.Companion.ARG_ITEM_IXUR)
@@ -51,6 +54,7 @@ class ActivityDetail : AppCompatActivity() {
                     lFragment.arguments = arguments
                     supportFragmentManager.beginTransaction().add(R.id.activity_detail_container, lFragment).commit()
                 }
+
                 "BuchFragment" -> {
                     val buchId = intent.getStringExtra(FundstellenTitelFragment.Companion.ARG_ITEM_BUCH)
                     val buch = intent.getStringExtra(FundstellenTitelFragment.Companion.ARG_ITEM_LONGNAME)
@@ -60,6 +64,7 @@ class ActivityDetail : AppCompatActivity() {
                     bFragment.arguments = arguments
                     supportFragmentManager.beginTransaction().add(R.id.activity_detail_container, bFragment).commit()
                 }
+
                 "KomponistFragment" -> {
                     val shortKomponist = intent.getStringExtra(FundstellenTitelFragment.Companion.ARG_ITEM_KOMPONIST)
                     val komponist = intent.getStringExtra(FundstellenTitelFragment.Companion.ARG_ITEM_LONGNAME)
@@ -69,6 +74,7 @@ class ActivityDetail : AppCompatActivity() {
                     kFragment.arguments = arguments
                     supportFragmentManager.beginTransaction().add(R.id.activity_detail_container, kFragment).commit()
                 }
+
                 "TitelFragment" -> {
                     val titel = intent.getStringExtra(FundstellenBuchFragment.Companion.ARG_ITEM_TITEL)
                     val titelIx = intent.getStringExtra(FundstellenBuchFragment.Companion.ARG_ITEM_TITEL_IX)
@@ -81,7 +87,7 @@ class ActivityDetail : AppCompatActivity() {
             }
         }
 
-         */
+
     }
     /**
      * how do we activate options here?
@@ -102,5 +108,5 @@ class ActivityDetail : AppCompatActivity() {
      * }
      * return super.onOptionsItemSelected(item);
      * }
-     */
+     * */
 }

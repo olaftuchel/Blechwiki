@@ -1,6 +1,5 @@
 package org.redderei.Blechwiki
 
-import android.app.Application
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
@@ -12,10 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import org.redderei.Blechwiki.gettersetter.Constant
-import org.redderei.Blechwiki.repository.BlechViewModel
 import org.redderei.Blechwiki.util.SharedPreference
-import androidx.lifecycle.*
-
 
 /**Features
  * Tabview (Lieder, Bücher, Komponist, Titel)
@@ -28,13 +24,13 @@ import androidx.lifecycle.*
 class MainActivity : AppCompatActivity() {
 /*    public val blechViewModel: BlechViewModel by lazy {
         val factory = MyViewModelFactory(app = Application())
-        Log.d(ContentValues.TAG, "Mainactivity (define MyViewModelFactory as ViewModelProvider)")
+        Log.d( "Mainactivity", "define MyViewModelFactory as ViewModelProvider)")
         ViewModelProvider(this, factory).get(BlechViewModel::class.java)
     }
 */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(ContentValues.TAG, "Mainactivity (onCreate): savedInstanceState= $savedInstanceState")
+        Log.d( "Mainactivity", "onCreate: savedInstanceState= $savedInstanceState")
 
         // store context for later use
         appContext = this
@@ -113,42 +109,43 @@ class MainActivity : AppCompatActivity() {
     //    }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 //        super.onRestoreInstanceState(savedInstanceState);
-        Log.d(ContentValues.TAG, "Mainactivity (onRestoreInstanceState)")
+        Log.d( "Mainactivity", "onRestoreInstanceState")
         //        someVarA = savedInstanceState.getInt("someVarA");
 //        someVarB = savedInstanceState.getString("someVarB");
     }
 
     public override fun onStart() {
         super.onStart()
-        Log.d(ContentValues.TAG, "Mainactivity (onStart)")
+        Log.d( "Mainactivity", "onStart")
     }
 
     public override fun onResume() {
         super.onResume()
-        Log.d(ContentValues.TAG, "Mainactivity (onResume)")
+        Log.d( "Mainactivity", "onResume")
     }
 
     public override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "Mainactivity (onPause)")
+        Log.d( "Mainactivity", "onPause")
     }
 
     public override fun onStop() {
         super.onStop()
-        Log.d(ContentValues.TAG, "Mainactivity (onStop)")
+        Log.d( "Mainactivity", "onStop")
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        Log.d(ContentValues.TAG, "Mainactivity (onDestroy)")
+        Log.d( "Mainactivity", "onDestroy")
     }
 }
 
+/*
 class MyViewModelFactory(private val app: Application) :
     ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        Log.d(ContentValues.TAG, "Mainactivity (MyViewModelFactory)")
+        Log.d( "Mainactivity", "MyViewModelFactory)")
         if (modelClass.isAssignableFrom(BlechViewModel::class.java)) {
             return BlechViewModel(app) as T
         }
@@ -156,3 +153,4 @@ class MyViewModelFactory(private val app: Application) :
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+*/

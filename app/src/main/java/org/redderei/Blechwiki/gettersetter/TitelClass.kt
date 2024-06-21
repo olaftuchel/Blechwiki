@@ -10,9 +10,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = Constant.TABLE_TITEL)
 class TitelClass(
     @PrimaryKey(autoGenerate = true) val uid: Int?,
-    @ColumnInfo(name = Constant.TITELOHNEKOMMA) val TitelOhneKomma: String,
-    @ColumnInfo(name = Constant.TITEL) val Titel: String,
-    @ColumnInfo(name = Constant.IX) val Ix: String,
+    @ColumnInfo(name = Constant.TITELOHNEKOMMA) val titelohneKomma: String,
+    @ColumnInfo(name = Constant.TITEL) val titel: String,
+    @ColumnInfo(name = Constant.IX) val ix: String,
     @ColumnInfo(name = Constant.CHANGECOUNTER) var changecounter: Int,
     @ColumnInfo(name = Constant.CHANGE) var change: String
     )

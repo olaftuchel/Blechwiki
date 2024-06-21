@@ -18,7 +18,7 @@ class BuchClass(
     @ColumnInfo(name = Constant.UNTERTITEL) var untertitel: String?,
     @ColumnInfo(name = Constant.ERSCHEINJAHR) var erscheinjahr: String?,
     @ColumnInfo(name = Constant.HERAUSGEBER) var herausgeber: String?,
-    @ColumnInfo(name = Constant.HERAUSG_VORNAME) var herausg_vorname: String?,
+    @ColumnInfo(name = Constant.HERAUSG_VORNAME) var herausgvorname: String?,
     @ColumnInfo(name = Constant.VERLAG) var verlag: String?,
     @ColumnInfo(name = Constant.VERLAGSNUMMER) var verlagsnummer: String?,
     @ColumnInfo(name = Constant.ZULIEFERUNG) var zulieferung: String?,

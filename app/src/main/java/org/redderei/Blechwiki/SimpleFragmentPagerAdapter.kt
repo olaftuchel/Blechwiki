@@ -14,20 +14,27 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 class SimpleFragmentPagerAdapter(private val mContext: Context, fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!) {
     // This determines the fragment for each tab
     override fun getItem(position: Int): Fragment {
-        return if (position == 0) {
-            Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: LiedFragment selected")
-            LiedFragment()
-        } else if (position == 1) {
-            Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: BuchFragment selected")
-            BuchFragment()
-        } else {
-/*
-       Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: TitelFragment selected")
-            TitelFragment()
-        } else {
-*/
-            Log.d(ContentValues.TAG, "SimpleFragmentPagerAdapter: other selected")
-            KomponistFragment()
+        when (position) {
+            0 -> {
+                Log.d("SimpleFragmentPagerAdapter", "LiedFragment selected ${position}")
+                return LiedFragment()
+            }
+            1 -> {
+                Log.d("SimpleFragmentPagerAdapter", "BuchFragment selected ${position}")
+                return BuchFragment()
+            }
+            2 -> {
+                Log.d("SimpleFragmentPagerAdapter", "KomponistFragment selected ${position}")
+                return KomponistFragment()
+            }
+            3 -> {
+                Log.d("SimpleFragmentPagerAdapter", "TitelFragment selected ${position}")
+                return TitelFragment()
+            }
+            else -> {
+                Log.d("SimpleFragmentPagerAdapter", "other case, selected ${position}")
+                throw Exception("We should not be here")
+            }
         }
     }
 

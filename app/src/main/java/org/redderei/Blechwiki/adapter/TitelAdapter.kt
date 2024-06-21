@@ -17,7 +17,7 @@ import java.util.*
 
 
 
-class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<TitelViewHolder>(), Filterable {
+class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<TitelAdapter.TitelViewHolder>(), Filterable {
     private var charStringOld: String? = null
     private lateinit var mTitelListOriginal: List<TitelClass>
 
@@ -34,13 +34,13 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TitelViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_titel, parent, false)
+            .inflate(R.layout.list_titel, parent, false)
         // set the view's size, margins, paddings and layout parameters
         return TitelViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TitelViewHolder, position: Int) {
-        holder.titleTextView.text = mTitelList[position].Titel
+        holder.titleTextView.text = mTitelList[position].titel
     }
 
     fun setListEntries(mList: List<TitelClass>) {
@@ -57,7 +57,7 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 var charString = charSequence.toString()
-                charString = charString.toLowerCase(Locale.getDefault())
+                charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
                     mTitelList = mTitelList // filtering starts
                     charStringOld = charString
@@ -68,7 +68,7 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
                 } else {
                     val filteredList: MutableList<TitelClass> = ArrayList()
                     for (row in mTitelList) {
-                        if (row.Titel.toLowerCase(Locale.getDefault()).contains(charString)) {
+                        if (row.titel.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }

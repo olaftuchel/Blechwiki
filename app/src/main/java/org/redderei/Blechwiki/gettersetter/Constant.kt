@@ -12,6 +12,7 @@ object Constant {
     const val PREF_AUTO_NR_BUCH = "AutoNrBuch"
     const val PREF_AUTO_NR_KOMPONIST = "AutoNrKomponist"
     const val PREF_AUTO_NR_TITEL = "AutoNrTitel"
+    // need same order of arrays below
     val mBuchLang = arrayOf("Baden/Elsaß/Lothringen", "Bayern/Thüringen", "Hessen-Nassau", "Kurhessen-Waldeck", "Mecklenburg", "Niedersachsen/Bremen", "Nordelbien", "Oldenburg",
             "Österreich", "Pfalz", "Reformierte", "Rheinland/Westfalen/Lippe", "Württemberg", "alle Anhänge")
     var mBuchKurz = arrayOf("BEL", "BT", "HN", "KW", "M", "NB", "N", "Ol", "Ö", "P", "R", "RWL", "W", "alleAnhänge")
@@ -21,6 +22,11 @@ object Constant {
             "Mittag und das täglich Brot", "Morgen", "Nächsten-und Feindesliebe", "Natur und Jahreszeiten", "Ökumene",
             "Ostern", "Passion", "Pfingsten", "Psalmen und Lobgesänge", "Rechtfertigung und Zuversicht", "Sammlung und Sendung",
             "Sterben und ewiges Leben", "Taufe und Konfirmation", "Trauung", "Trinitatis", "Umkehr und Nachfolge", "Weihnachten", "Wort Gottes")
+
+    // Rest information
+    const val restURL = "http://pcportal.ddns.net/RestBlechWiki/api/"
+    const val imgURL = "http://pcportal.ddns.net/Bilder/BilderBuch/"
+    const val miniImgURL = "http://pcportal.ddns.net/Bilder/BilderBuch/mini240/"
 
     // DB variables
     const val DB_NAME = "blechwiki.db"

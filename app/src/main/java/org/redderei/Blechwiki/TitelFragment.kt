@@ -1,47 +1,74 @@
 package org.redderei.Blechwiki
 
+import android.app.SearchManager
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.content.res.Configuration
+import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.TitelClass
-import org.redderei.Blechwiki.repository.BlechViewModel
+import org.redderei.Blechwiki.repository.TitelViewModel
 import org.redderei.Blechwiki.adapter.TitelAdapter
+import org.redderei.Blechwiki.util.RecyclerTouchListener
+import org.redderei.Blechwiki.util.SideIndex
 import java.util.*
 
 /**
  * A simple [Fragment] subclass.
  */
-class TitelFragment : Fragment(){
-//class TitelFragment : Fragment(), View.OnClickListener {
+class TitelFragment : Fragment(), View.OnClickListener {
     var mTitelList: List<TitelClass> = ArrayList()
-    private var mAdapter: TitelAdapter? = null
+    private lateinit var mAdapter: TitelAdapter
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
     private lateinit var rootView: View
     private val mDualPane = false
     private var mActivatedPosition = ListView.INVALID_POSITION
-    private var blechViewModel: BlechViewModel? = null
-    /*
+    private var titelViewModel: TitelViewModel? = null
+
+    companion object {
+        private const val STATE_ACTIVATED_POSITION = "activated_position"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(ContentValues.TAG, "TitelFragment (onCreate) savedInstanceState=$savedInstanceState")
+        Log.d("TitelFragment", "onCreate: savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = TitelAdapter(mTitelList)
-        blechViewModel = ViewModelProvider(this).get(BlechViewModel::class.java)
-        blechViewModel!!.getAllTitel("")?.observe(this, { titel -> // Update the cached copy of the words in the adapter.
-            Log.v(ContentValues.TAG, "TitelFragment (onCreate: onChanged): mAdapter changed ")
-            mAdapter!!.setListEntries(titel)
-            // calculate Index List and show it up
-            mapIndex = SideIndex.getTitelIndexList(mAdapter!!)
-            SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-        })
+
+        titelViewModel = ViewModelProvider(this).get(TitelViewModel::class.java)
+        GlobalScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                titelViewModel!!.getAllTitel("")?.observe(appContext) { titel -> // Update the cached copy of the words in the adapter.
+                    Log.v("TitelFragment", "onCreate: mAdapter changed ")
+                    mAdapter!!.setListEntries(titel)
+                    // calculate Index List and show it up
+                    mapIndex = SideIndex.getTitelIndexList(mAdapter!!)
+                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                }
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        Log.d(ContentValues.TAG, "TitelFragment (onCreateView):  savedInstanceState=$savedInstanceState")
+        Log.d("TitelFragment", "onCreateView:  savedInstanceState=$savedInstanceState")
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
@@ -59,7 +86,8 @@ class TitelFragment : Fragment(){
         recyclerView!!.itemAnimator = DefaultItemAnimator()
         recyclerView!!.addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         recyclerView!!.adapter = mAdapter
-        recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView, object : ClickListener {
+        recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView, object :
+            RecyclerTouchListener.ClickListener {
             override fun onClick(view: View?, position: Int) {
                 onMyItemClick(position)
             }
@@ -69,9 +97,11 @@ class TitelFragment : Fragment(){
         return rootView
     }
 
+    //TODO: remove depricated items
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "TitelFragment: onActivityCreated")
+        Log.d("TitelFragment", "onActivityCreated")
         //
 //        // 4. Access the ListView
 //        mTitelListView = getListView();
@@ -92,17 +122,16 @@ class TitelFragment : Fragment(){
     // -------- Alphabetischer Index neben der Liste --------
     // http://androidopentutorials.com/android-listview-with-alphabetical-side-index/
     override fun onClick(view: View) {
-        Log.v(ContentValues.TAG, "TitelFragment (onClick)")
+        Log.v("TitelFragment", "onClick")
         val selectedIndex = view as TextView
         val index = mapIndex!![selectedIndex.text]!!
         recyclerView!!.layoutManager!!.scrollToPosition(index)
     }
 
-    // end -------- Alphabetischer Index neben der Liste --------
     fun onMyItemClick(position: Int) {
-        Log.d(ContentValues.TAG, "TitelFragment (onListItemClick) position=$position")
-        val idTitel = mAdapter!!.mTitelList[position].Titel
-        val idIx = mAdapter!!.mTitelList[position].Ix
+        Log.d("TitelFragment", "onListItemClick position=$position")
+        val idTitel = mAdapter!!.mTitelList[position].titel
+        val idIx = mAdapter!!.mTitelList[position].ix
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -124,10 +153,12 @@ class TitelFragment : Fragment(){
         }
     }
 
+    //TODO: remove depricated items
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         //if (menu.size() == 0)
         run {
-            Log.d(ContentValues.TAG, "TitelFragment: onCreateOptionsMenu")
+            Log.d("TitelFragment", "onCreateOptionsMenu")
             val mOnClickListener: View.OnClickListener
             mOnClickListener = View.OnClickListener { view: View -> this.onClick(view) }
             // Inflate the menu.
@@ -141,13 +172,13 @@ class TitelFragment : Fragment(){
             searchView.maxWidth = Int.MAX_VALUE
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
-                    Log.v(ContentValues.TAG, "TitelFragment (onQueryTextSubmit): $query")
+                    Log.v("TitelFragment", "onQueryTextSubmit: $query")
                     mAdapter!!.filter.filter(query)
                     return false
                 }
 
                 override fun onQueryTextChange(query: String): Boolean {
-                    Log.d(ContentValues.TAG, "TitelFragment (onQueryTextChange): $query")
+                    Log.d("TitelFragment", "onQueryTextChange: $query")
                     if (mAdapter != null) {
                         mAdapter!!.filter.filter(query) {
                             mapIndex = SideIndex.getTitelIndexList(mAdapter!!)
@@ -160,8 +191,10 @@ class TitelFragment : Fragment(){
         }
     }
 
+    //TODO: remove depricated items
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(ContentValues.TAG, "TitelFragment: onOptionsItemSelected")
+        Log.d("TitelFragment", "onOptionsItemSelected")
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_ueber -> {
@@ -177,7 +210,7 @@ class TitelFragment : Fragment(){
     override fun onSaveInstanceState(outState: Bundle) {
         // gets restored in onCreate
         super.onSaveInstanceState(outState)
-        Log.d(ContentValues.TAG, "TitelFragment (onSaveInstanceState)")
+        Log.d("TitelFragment", "onSaveInstanceState")
         if (mActivatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition)
@@ -191,15 +224,15 @@ class TitelFragment : Fragment(){
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //            Toast.makeText(mActivity, "landscape", Toast.LENGTH_SHORT).show();
-            Log.d(ContentValues.TAG, "TitelFragment: onConfigurationChanged: landscape")
+            Log.d("TitelFragment", "onConfigurationChanged: landscape")
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
 //            Toast.makeText(mActivity, "portrait", Toast.LENGTH_SHORT).show();
-            Log.d(ContentValues.TAG, "TitelFragment: onConfigurationChanged: portrait")
+            Log.d("TitelFragment", "onConfigurationChanged: portrait")
         }
     }
 
     private fun setActivatedPosition(position: Int) {
-        Log.d(ContentValues.TAG, "TitelFragment: setActivatedPosition($position)")
+        Log.d("TitelFragment", "setActivatedPosition($position)")
         //        if (position == ListView.INVALID_POSITION) {
 //            getListView().setItemChecked(mActivatedPosition, false);
 //        } else {
@@ -210,41 +243,36 @@ class TitelFragment : Fragment(){
 
     override fun onStart() {
         super.onStart()
-        Log.d(ContentValues.TAG, "TitelFragment (onStart)")
+        Log.d("TitelFragment", "onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(ContentValues.TAG, "TitelFragment (onResume)")
+        Log.d("TitelFragment", "onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "TitelFragment (onPause)")
+        Log.d("TitelFragment", "onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(ContentValues.TAG, "TitelFragment (onStop)")
+        Log.d("TitelFragment", "onStop")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(ContentValues.TAG, "TitelFragment (onDestroyView)")
+        Log.d("TitelFragment", "onDestroyView")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(ContentValues.TAG, "TitelFragment (onDestroy)")
+        Log.d("TitelFragment", "onDestroy")
     }
 
     override fun onDetach() {
         super.onDetach()
-        Log.d(ContentValues.TAG, "TitelFragment (onDetach)")
+        Log.d("TitelFragment", "onDetach")
     }
-
-    companion object {
-        private const val STATE_ACTIVATED_POSITION = "activated_position"
-    }
-*/
 }

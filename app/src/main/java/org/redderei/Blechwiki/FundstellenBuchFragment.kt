@@ -1,31 +1,47 @@
 package org.redderei.Blechwiki
 
 import android.content.*
+import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import android.util.Log
+import android.widget.TextView
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuItemCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.adapter.TitelInBuchAdapter
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.titelFundstellen
+import org.redderei.Blechwiki.repository.TitelViewModel
+import org.redderei.Blechwiki.util.RecyclerTouchListener
+import org.redderei.Blechwiki.util.SideIndex
 import java.util.*
 
 /**
  * Created by ot775x on 24.06.2018.
+ * Gets called from TitelFragment for one title, it shows up books where to find this title
  */
-class FundstellenBuchFragment
+class FundstellenBuchFragment: Fragment() {
 /**
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-    : Fragment() {
-    private var clickAction = ""
-    var mBuchListView: List<TitelInBuchClass> = ArrayList()
+    var mTitelListView: List<TitelInBuchClass> = ArrayList()
     private lateinit var mAdapter: TitelInBuchAdapter
-    private var mContext: Context? = null
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
     private var searchString: String? = null
     private lateinit var rootView: View
     private val sortType = "ABC"
+    private var titelViewModel: TitelViewModel? = null  // needs to be initialized with anything or abstract
 
     companion object {
         /**
@@ -35,85 +51,71 @@ class FundstellenBuchFragment
         // for setting the fragment title via ActivityDetail
         const val ARG_ITEM_TITEL = "ARG_ITEM_TITEL"
         const val ARG_ITEM_TITEL_IX = "ARG_ITEM_TITEL_IX"
+        /*
+        needs to be clarified
+        */
         private const val NAME_TITLE = "title"
     }
-/*
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.v(ContentValues.TAG, "FundstellenBuchFragment: onCreate")
+        Log.v("FundstellenBuchFragment", "onCreate")
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        clickAction = "GetTitelFundstellenIx"
-        // first version, but is not ideal for all the content with regards to special characters
         // searchString contains integer
         searchString = requireArguments().getString(ARG_ITEM_TITEL_IX).toString()
         requireActivity().title = requireArguments().getString(ARG_ITEM_TITEL).toString()
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment: onCreate ARG_ITEM_TITEL_IX searchString=$searchString")
+        Log.d("FundstellenBuchFragment", "onCreate ARG_ITEM_TITEL_IX searchString=$searchString")
+        mAdapter = TitelInBuchAdapter(titelFundstellen, mTitelListView)
+        titelViewModel = ViewModelProvider(this).get(TitelViewModel::class.java)
+        // Update the cached copy of the words in the adapter.
+        GlobalScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                titelViewModel!!.getTitelDetails(searchString?.toInt()!!).observe(requireActivity())
+                {buecher: List<TitelInBuchClass> ->
+                    Log.v("FundstellenBuchFragment", "onCreate: mAdapter changed")
+                    mAdapter.setListEntries(buecher)
+                    val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
+                    // calculate Index List and show it up
+                    mapIndex = SideIndex.getFundstellenBuchIndexList(mAdapter, sortType)
+                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                }
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        Log.v(ContentValues.TAG, "FundstellenBuchFragment: onCreateView")
+        Log.v("FundstellenBuchFragment", "onCreateView")
+        super.onCreateView(inflater, container, savedInstanceState)
         // Show the dummy content as text in a TextView.
         rootView = inflater.inflate(R.layout.fragment_blank, container, false)
         recyclerView = rootView.findViewById<View>(R.id.rv_recycler_view) as RecyclerView
-        mAdapter = TitelInBuchAdapter(requireContext(), mBuchListView)
 
-        // getContect instead of getApplicationContext ??
         val mLayoutManager: RecyclerView.LayoutManager = LinearLayoutManager(context)
         recyclerView!!.layoutManager = mLayoutManager
         recyclerView!!.itemAnimator = DefaultItemAnimator()
         recyclerView!!.addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         recyclerView!!.adapter = mAdapter
-        recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView, object : ClickListener {
-            override fun onClick(view: View?, position: Int) {  // show main buch properties
+        recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView,
+                object : RecyclerTouchListener.ClickListener {
+                    override fun onClick(view: View?, position: Int) {  // show main buch properties
 //                Toast.makeText(getContext(), "FundstellenBuchFragment(onCreateView(onClick)), position="+position, Toast.LENGTH_SHORT).show();
-            }
+                    }
 
-            override fun onLongClick(view: View?, position: Int) {}
-        }))
-//        soapQuery()
+                    override fun onLongClick(view: View?, position: Int) {}
+                }))
         return rootView
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment: onActivityCreated")
-    }
-
     fun onClick(view: View) {
-        Log.v(ContentValues.TAG, "FundstellenBuchFragment (onClick)")
+        Log.v("FundstellenBuchFragment", "onClick")
         val selectedIndex = view as TextView
         val index = mapIndex!![selectedIndex.text]!!
         recyclerView!!.layoutManager!!.scrollToPosition(index)
     }
-/*
-    private fun soapQuery() {
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment (soapQuery)")
-        val mOnClickListener: View.OnClickListener
-        mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
-        mContext = requireActivity().applicationContext as Context
-        soapTask = SoapTask.Companion.MySoapTask(mContext)
-        soapTask!!.setDownloadCompleteListener(object : SoapTask.Companion.MySoapTask.DownloadCompleteListener {
-            override fun onUpdate(mBuchListview: MutableList<*>?) {
-                Log.v(ContentValues.TAG, "FundstellenBuchFragment: onUpdate")
-                if (soapTask!!.isCancelled) {
-                    Toast.makeText(context, "FundstellenBuch: Network Error", Toast.LENGTH_SHORT).show()
-                } else {
-                    Sorter.Companion.sortFundstellenBuch(mAdapter, -1)
-                    mAdapter!!.filter.filter("") {
-                        mapIndex = SideIndex.getFundstellenBuchIndexList(mAdapter, sortType)
-                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                    }
-                }
-            }
-        })
-        soapTask!!.execute(clickAction, searchString, mBuchListView)
-        if (soapTask!!.isCancelled) {
-            Toast.makeText(context, "FundstellenBuch: Network Error", Toast.LENGTH_SHORT).show()
-        }
-    }
-*/
+
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment (onCreateOptionsMenu)")
+        Log.d("FundstellenBuchFragment", "onCreateOptionsMenu")
         val mOnClickListener: View.OnClickListener
         mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         // Inflate the menu.
@@ -129,12 +131,12 @@ class FundstellenBuchFragment
         MenuItemCompat.setActionView(item, sv)
         sv.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                Log.v(ContentValues.TAG, "FundstellenBuchFragment (onQueryTextSubmit): $query")
+                Log.v("FundstellenBuchFragment", "onQueryTextSubmit: $query")
                 return false
             }
 
             override fun onQueryTextChange(query: String): Boolean {
-                Log.v(ContentValues.TAG, "FundstellenBuchFragment (onQueryTextChange): $query")
+                Log.v("FundstellenBuchFragment","onQueryTextChange: $query")
                 if (mAdapter != null) {
                     mAdapter!!.filter.filter(query) {
                         mapIndex = SideIndex.getFundstellenBuchIndexList(mAdapter, sortType)
@@ -146,8 +148,9 @@ class FundstellenBuchFragment
         })
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment: onOptionsItemSelected")
+        Log.d("FundstellenBuchFragment", "onOptionsItemSelected")
         return when (item.itemId) {
             R.id.menu_action_ueber -> {
                 //                Toast.makeText(getActivity(), "action about", Toast.LENGTH_SHORT).show();
@@ -161,16 +164,15 @@ class FundstellenBuchFragment
 
     override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "FundstellenBuchFragment (onPause -> soapTask.cancel)")
-//        if (soapTask != null) soapTask!!.cancel(true)
+        Log.d(ContentValues.TAG, "FundstellenBuchFragment (onPause)")
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        Log.d(ContentValues.TAG, "FundstellenTitelFragment (onSaveInstanceState)")
+        Log.d("FundstellenBuchFragment", "nSaveInstanceState")
         if (requireActivity().title.toString() !== activity!!.getString(R.string.app_name)) {
             // Serialize and persist the activated item position.
-            savedInstanceState.putCharSequence(FundstellenBuchFragment.Companion.NAME_TITLE, activity!!.title.toString())
+            savedInstanceState.putCharSequence(FundstellenBuchFragment.Companion.NAME_TITLE, requireActivity().title.toString())
         }
     }
 
@@ -183,5 +185,4 @@ class FundstellenBuchFragment
             }
         }
     }
- */
 }

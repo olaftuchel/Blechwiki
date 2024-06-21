@@ -24,7 +24,8 @@ import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.adapter.BuchAdapter
 import org.redderei.Blechwiki.gettersetter.BuchClass
-import org.redderei.Blechwiki.repository.BlechViewModel
+import org.redderei.Blechwiki.gettersetter.Constant
+import org.redderei.Blechwiki.repository.BuchViewModel
 import org.redderei.Blechwiki.util.RecyclerTouchListener
 import org.redderei.Blechwiki.util.SideIndex
 
@@ -39,7 +40,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
     private lateinit var rootView: View
     private val mDualPane = false
     private var mActivatedPosition = ListView.INVALID_POSITION
-    private var blechViewModel: BlechViewModel? = null
+    private var blechViewModel: BuchViewModel? = null
 
     companion object {
         private const val STATE_ACTIVATED_POSITION = "activated_position"
@@ -47,27 +48,27 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(ContentValues.TAG, "BuchFragment (onCreate): savedInstanceState=$savedInstanceState")
+        Log.d("BuchFragment", "onCreate: savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = BuchAdapter(mBuchList)
 
-        blechViewModel = ViewModelProvider(this).get(BlechViewModel::class.java)
+        blechViewModel = ViewModelProvider(this).get(BuchViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 blechViewModel!!.getAllBuecher("")?.observe(appContext, { buecher -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "BuchFragment (onCreate: onChanged): mAdapter changed ")
-                    mAdapter!!.setListEntries(buecher)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getBuchIndexList(mAdapter!!)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                        Log.d("BuchFragment", "onCreate:  mAdapter changed ")
+                        mAdapter!!.setListEntries(buecher)
+                        // calculate Index List and show it up
+                        mapIndex = SideIndex.getBuchIndexList(mAdapter!!)
+                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                    })
             }
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        Log.d(ContentValues.TAG, "BuchFragment (onCreateView), savedInstanceState=$savedInstanceState")
+        Log.d("BuchFragment", "onCreateView: savedInstanceState=$savedInstanceState")
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null && savedInstanceState.containsKey(BuchFragment.Companion.STATE_ACTIVATED_POSITION)) {
@@ -79,41 +80,41 @@ class BuchFragment : Fragment(), View.OnClickListener {
         rootView = inflater.inflate(R.layout.fragment_blank, container, false)
         recyclerView = rootView.findViewById<View>(R.id.rv_recycler_view) as RecyclerView
 
-        // getContect instead of getApplicationContext ??
+        // getContext instead of getApplicationContext ??
         val mLayoutManager: RecyclerView.LayoutManager = LinearLayoutManager(context)
         recyclerView!!.layoutManager = mLayoutManager
         recyclerView!!.itemAnimator = DefaultItemAnimator()
         recyclerView!!.addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         recyclerView!!.adapter = mAdapter
         recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView, object : RecyclerTouchListener.ClickListener {
-            override fun onClick(view: View?, position: Int) {
-                onMyItemClick(position)
-            }
+                    override fun onClick(view: View?, position: Int) {
+                        onMyItemClick(position)
+                    }
 
-            override fun onLongClick(view: View?, position: Int) {
-                Log.v(ContentValues.TAG, "BuchFragment (onCreateView): onLongClick")
-                // Toast.makeText(mActivity, "OnLongClick position=" + position, Toast.LENGTH_SHORT).show();
-                val detailIntent = Intent(activity, BuchDetailActivity::class.java)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mBuchList[position].buch)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mBuchList[position].untertitel)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mBuchList[position].erscheinjahr)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mBuchList[position].herausgeber)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mBuchList[position].herausg_vorname)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mBuchList[position].verlag)
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mBuchList[position].verlagsnummer)
-//                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, mAdapter!!.mBuchList[position].imgUrl)
+                    override fun onLongClick(view: View?, position: Int) {
+                        Log.v("BuchFragment", "onCreateView): onLongClick")
+                        // Toast.makeText(mActivity, "OnLongClick position=" + position, Toast.LENGTH_SHORT).show();
+                        val detailIntent = Intent(activity, BuchDetailActivity::class.java)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mBuchList[position].buch)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mBuchList[position].untertitel)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mBuchList[position].erscheinjahr)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mBuchList[position].herausgeber)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mBuchList[position].herausgvorname)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mBuchList[position].verlag)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mBuchList[position].verlagsnummer)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, Constant.imgURL + mAdapter!!.mBuchList[position].buchkurz + ".jpg")
 // without content of imgUrl
-                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, "https://de.wikipedia.org/wiki/Buch#/media/Datei:Bibel-1.jpg")
-                startActivity(detailIntent)
-            }
-        }))
+//                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, "https://de.wikipedia.org/wiki/Buch#/media/Datei:Bibel-1.jpg")
+                        startActivity(detailIntent)
+                    }
+                }))
         return rootView
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "BuchFragment (onActivityCreated), savedInstanceState=$savedInstanceState")
+        Log.d("BuchFragment", "onActivityCreated: savedInstanceState=$savedInstanceState")
 
 //        // 4. Access the ListView
 //        mBuchListView = getListView();
@@ -134,14 +135,14 @@ class BuchFragment : Fragment(), View.OnClickListener {
     // -------- Alphabetischer Index neben der Liste --------
     // http://androidopentutorials.com/android-listview-with-alphabetical-side-index/
     override fun onClick(view: View) {
-        Log.v(ContentValues.TAG, "BuchFragment (onClick)")
+        Log.v("BuchFragment", "onClick")
         val selectedIndex = view as TextView
         val index = mapIndex!![selectedIndex.text]!!
         recyclerView!!.layoutManager!!.scrollToPosition(index)
     }
 
     fun onMyItemClick(position: Int) {
-        Log.d(ContentValues.TAG, "BuchFragment (onListItemClick) position=$position")
+        Log.d("BuchFragment", "onListItemClick: position=$position")
         val idString = mAdapter!!.mBuchList[position].buchId.toString()
         val longName = mAdapter!!.mBuchList[position].buch
         if (mDualPane) {
@@ -167,7 +168,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(ContentValues.TAG, "BuchFragment (onCreateOptionsMenu)")
+        Log.d("BuchFragment", "onCreateOptionsMenu")
         //if (menu.size() == 0)
         run {
             val mOnClickListener = View.OnClickListener { view: View -> this.onClick(view) }
@@ -182,13 +183,13 @@ class BuchFragment : Fragment(), View.OnClickListener {
             searchView.maxWidth = Int.MAX_VALUE
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
-                    Log.v(ContentValues.TAG, "BuchFragment (onQueryTextSubmit) query: $query")
+                    Log.v("BuchFragment", "onQueryTextSubmit query: $query")
                     mAdapter!!.filter.filter(query)
                     return false
                 }
 
                 override fun onQueryTextChange(query: String): Boolean {
-                    Log.v(ContentValues.TAG, "BuchFragment (onQueryTextChange) query>$query<")
+                    Log.v("BuchFragment", "onQueryTextChange query: >$query<")
                     if (mAdapter != null) {
                         mAdapter!!.filter.filter(query) {
                             mapIndex = SideIndex.getBuchIndexList(mAdapter!!)
@@ -203,7 +204,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(ContentValues.TAG, "BuchFragment (onOptionsItemSelected)")
+        Log.d("BuchFragment", "onOptionsItemSelected")
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_ueber -> {
@@ -217,7 +218,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d(ContentValues.TAG, "BuchFragment (onSaveInstanceState)")
+        Log.d("BuchFragment", "onSaveInstanceState")
         if (mActivatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(BuchFragment.Companion.STATE_ACTIVATED_POSITION, mActivatedPosition)
@@ -230,10 +231,10 @@ class BuchFragment : Fragment(), View.OnClickListener {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //            Toast.makeText(mActivity, "landscape", Toast.LENGTH_SHORT).show();
-            Log.v(ContentValues.TAG, "BuchFragment onConfigurationChanged: landscape")
+            Log.v("BuchFragment", "onConfigurationChanged: landscape")
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
 //            Toast.makeText(mActivity, "portrait", Toast.LENGTH_SHORT).show();
-            Log.v(ContentValues.TAG, "BuchFragment onConfigurationChanged: portrait")
+            Log.v("BuchFragment", "onConfigurationChanged: portrait")
         }
     }
 
@@ -241,7 +242,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
      * Turns on activate-on-click mode. When this mode is on, list items will be given the 'activated' state when touched.
      */
     private fun setActivatedPosition(position: Int) {
-        Log.d(ContentValues.TAG, "BuchFragment (setActivatedPosition)[$position]")
+        Log.d("BuchFragment", "setActivatedPosition: [$position]")
         //        if (position == ListView.INVALID_POSITION) {
 //            getListView().setItemChecked(mActivatedPosition, false);
 //        } else {
@@ -252,36 +253,36 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        Log.d(ContentValues.TAG, "BuchFragment (onStart)")
+        Log.d("BuchFragment", "onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(ContentValues.TAG, "BuchFragment (onResume)")
+        Log.d("BuchFragment", "onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "BuchFragment (onPause)")
+        Log.d("BuchFragment", "onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(ContentValues.TAG, "BuchFragment (onStop)")
+        Log.d("BuchFragment", "onStop")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(ContentValues.TAG, "BuchFragment (onDestroyView)")
+        Log.d("BuchFragment", "onDestroyView")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(ContentValues.TAG, "BuchFragment (onDestroy)")
+        Log.d("BuchFragment", "onDestroy")
     }
 
     override fun onDetach() {
         super.onDetach()
-        Log.d(ContentValues.TAG, "BuchFragment (onDetach)")
+        Log.d("BuchFragment", "onDetach")
     }
 }

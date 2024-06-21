@@ -32,14 +32,13 @@ import org.redderei.Blechwiki.util.SideIndex
  * A simple [Fragment] subclass.
  */
 class KomponistFragment : Fragment(), View.OnClickListener {
-    var mKomponistList: List<KomponistClass> = ArrayList()
+    private var mKomponistList: List<KomponistClass> = ArrayList()
     private lateinit var mAdapter: KomponistAdapter
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
     private lateinit var rootView: View
     private val mDualPane = false
     private var mActivatedPosition = ListView.INVALID_POSITION
-    private val index: String? = null
     private var komponistViewModel: KomponistViewModel? = null
 
     companion object {
@@ -50,7 +49,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(ContentValues.TAG, "KomponistFragment (onCreate): savedInstanceState=$savedInstanceState")
+        Log.d("KomponistFragment", "onCreate: savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = KomponistAdapter(mKomponistList)
 
@@ -58,7 +57,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 komponistViewModel!!.getAllKomponist("0")?.observe(appContext, { komponist -> // Update the cached copy of the words in the adapter.
-                    Log.d(ContentValues.TAG, "KomponistFragment (onCreate: onChanged): mAdapter changed ")
+                    Log.d("KomponistFragment", "onCreate: mAdapter changed ")
                     mAdapter!!.setListEntries(komponist)
                     // calculate Index List and show it up
                     mapIndex = SideIndex.getKomponistIndexList(mAdapter!!)
@@ -70,7 +69,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        Log.d(ContentValues.TAG, "KomponistFragment (onCreateView): savedInstanceState=$savedInstanceState")
+        Log.d("KomponistFragment", "onCreateView: savedInstanceState=$savedInstanceState")
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null && savedInstanceState.containsKey(KomponistFragment.Companion.STATE_ACTIVATED_POSITION)) {
@@ -101,7 +100,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
     @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.d(ContentValues.TAG, "KomponistFragment (onActivityCreated), savedInstanceState=$savedInstanceState")
+        Log.d("KomponistFragment", "onActivityCreated, savedInstanceState=$savedInstanceState")
 
 //        // 4. Access the ListView
 //        mKomponistListView = getListView();
@@ -122,17 +121,16 @@ class KomponistFragment : Fragment(), View.OnClickListener {
     // -------- Alphabetischer Index neben der Liste --------
     // http://androidopentutorials.com/android-listview-with-alphabetical-side-index/
     override fun onClick(view: View) {
-        Log.v(ContentValues.TAG, "KomponistFragment (onClick)")
+        Log.v("KomponistFragment", "onClick")
         val selectedIndex = view as TextView
         val index = mapIndex!![selectedIndex.text]!!
         recyclerView!!.layoutManager!!.scrollToPosition(index)
     }
 
-    // end -------- Alphabetischer Index neben der Liste --------
     fun onMyItemClick(position: Int) {
-        Log.d(ContentValues.TAG, "KomponistFragment (onListItemClick): position=$position")
-        val shortName = mAdapter!!.mKomponistList[position].kurz
-        val longName = mAdapter!!.mKomponistList[position].Komponist
+        Log.d("KomponistFragment", "onListItemClick: position=$position")
+        val shortName = mAdapter!!.mKomponistList[position].id.toString()
+        val longName = mAdapter!!.mKomponistList[position].komponist
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -158,7 +156,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         //if (menu.size() == 0)
         run {
-            Log.d(ContentValues.TAG, "KomponistFragment (onCreateOptionsMenu)")
+            Log.d("KomponistFragment", "onCreateOptionsMenu")
             val mOnClickListener: View.OnClickListener
             mOnClickListener = View.OnClickListener { view: View -> this.onClick(view) }
             // Inflate the menu.
@@ -172,13 +170,13 @@ class KomponistFragment : Fragment(), View.OnClickListener {
             searchView.maxWidth = Int.MAX_VALUE
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
-                    Log.d(ContentValues.TAG, "KomponistFragment (onQueryTextSubmit): $query")
+                    Log.d("KomponistFragment", "onQueryTextSubmit: $query")
                     mAdapter!!.filter.filter(query)
                     return false
                 }
 
                 override fun onQueryTextChange(query: String): Boolean {
-                    Log.d(ContentValues.TAG, "KomponistFragment (onQueryTextChange): $query")
+                    Log.d("KomponistFragment", "onQueryTextChange: $query")
                     if (mAdapter != null) {
                         mAdapter!!.filter.filter(query) { // calculate Index List and show it up
                             mapIndex = SideIndex.getKomponistIndexList(mAdapter)
@@ -193,7 +191,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(ContentValues.TAG, "KomponistFragment (onOptionsItemSelected)")
+        Log.d("KomponistFragment", "onOptionsItemSelected")
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_ueber -> {
@@ -208,7 +206,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d(ContentValues.TAG, "KomponistFragment (onSaveInstanceState)")
+        Log.d("KomponistFragment", "onSaveInstanceState")
         if (mActivatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(KomponistFragment.Companion.STATE_ACTIVATED_POSITION, mActivatedPosition)
@@ -222,15 +220,15 @@ class KomponistFragment : Fragment(), View.OnClickListener {
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //            Toast.makeText(mActivity, "landscape", Toast.LENGTH_SHORT).show();
-            Log.v(ContentValues.TAG, "KomponistFragment (onConfigurationChanged): landscape")
+            Log.v("KomponistFragment", "onConfigurationChanged: landscape")
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
 //            Toast.makeText(mActivity, "portrait", Toast.LENGTH_SHORT).show();
-            Log.v(ContentValues.TAG, "KomponistFragment (onConfigurationChanged): portrait")
+            Log.v("KomponistFragment", "onConfigurationChanged: portrait")
         }
     }
 
     private fun setActivatedPosition(position: Int) {
-        Log.d(ContentValues.TAG, "KomponistFragment (setActivatedPosition): position=$position")
+        Log.d("KomponistFragment", "setActivatedPosition: position=$position")
         //        if (position == ListView.INVALID_POSITION) {
 //            getListView().setItemChecked(mActivatedPosition, false);
 //        } else {
@@ -241,37 +239,37 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
-        Log.d(ContentValues.TAG, "KomponistFragment (onStart)")
+        Log.d("KomponistFragment", "onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(ContentValues.TAG, "KomponistFragment (onResume)")
+        Log.d("KomponistFragment", "onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(ContentValues.TAG, "KomponistFragment (onPause)")
+        Log.d("KomponistFragment", "onPause")
 //        soapTask?.cancel(true)
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(ContentValues.TAG, "KomponistFragment (onStop)")
+        Log.d("KomponistFragment", "onStop")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(ContentValues.TAG, "KomponistFragment (onDestroyView)")
+        Log.d("KomponistFragment", "onDestroyView")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(ContentValues.TAG, "KomponistFragment (onDestroy)")
+        Log.d("KomponistFragment", "onDestroy")
     }
 
     override fun onDetach() {
         super.onDetach()
-        Log.d(ContentValues.TAG, "KomponistFragment (onDetach)")
+        Log.d("KomponistFragment", "onDetach")
     }
 }

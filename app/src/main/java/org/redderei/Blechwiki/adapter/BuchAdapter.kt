@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import org.redderei.Blechwiki.R
 import org.redderei.Blechwiki.gettersetter.BuchClass
+import org.redderei.Blechwiki.gettersetter.Constant
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -48,31 +49,29 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BuchViewHolder {
-        Log.v(TAG, "BuchAdapter (onCreateViewHolder)");
+        // Log.v("BuchAdapter", "onCreateViewHolder");
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_buch, parent, false)
+            .inflate(R.layout.list_buch, parent, false)
         // set the view's size, margins, paddings and layout parameters
         return BuchViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: BuchViewHolder, position: Int) {
-        Log.v(TAG, "BuchAdapter (onBindViewHolder)");
+        //Log.v("BuchAdapter", "onBindViewHolder");
         holder.titleTextView.text = mBuchList[position].buch
         holder.subtitleTextView.text = mBuchList[position].untertitel
-//        holder.detailTextView.text = mBuchList[position].erscheinjahr
-        //this would be normal varian for imgUrl
-//        Picasso.get().load(mBuchList[position].imgUrl).placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
-        Picasso.get().load("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Latin_dictionary.jpg/275px-Latin_dictionary.jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
+        holder.detailTextView.text = mBuchList[position].erscheinjahr
+        Picasso.get().load(Constant.miniImgURL + mBuchList[position].buchkurz + ".jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
     }
 
     fun setListEntries(mList: List<BuchClass>) {
-        Log.d(ContentValues.TAG, "BuchAdapter (setListEntries)")
+        //Log.d("BuchAdapter", "setListEntries")
         mBuchList = mList
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        Log.d(TAG, "BuchAdapter (getItemCount) " + mBuchList.size);
+        //Log.d("BuchAdapter", "getItemCount " + mBuchList.size);
         return mBuchList.size
     }
 

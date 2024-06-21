@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.*
 import org.redderei.Blechwiki.gettersetter.LiedClass
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 
 /**
  xxx ViewModel:
@@ -30,12 +31,17 @@ class LiedViewModel(app: Application) : AndroidViewModel(app) {
     private val mRepository: LiedRepository
 
     suspend fun getAllLieder(mKirche: String, sortType: String, query: String): LiveData<List<LiedClass>>? {
-        Log.d(ContentValues.TAG, "LiedViewModel (getAllLieder)")
+        Log.d("LiedViewModel", "getAllLieder")
         return mRepository.getAllLieder(mKirche, sortType, query)
     }
 
+    fun getLiedDetails(liedNr: Int): MutableLiveData<List<TitelInBuchClass>> {
+        Log.v("LiedViewModel", "getLiedDetails " + liedNr);
+        return mRepository.getLiedDetails(liedNr);
+    }
+
     init {
-        Log.d(ContentValues.TAG, "LiedViewModel (init)")
+        Log.d("LiedViewModel", "init")
         mRepository = LiedRepository(app)
     }
 }

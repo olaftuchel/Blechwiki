@@ -25,8 +25,8 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
         var titleTextView: TextView
         var detailTextView1: TextView
         var detailTextView2: TextView
-        fun bind(item: BuchClass) {
-            titleTextView.text = item.buch
+        fun bind(item: KomponistClass) {
+            titleTextView.text = item.komponist
         }
 
         init {
@@ -44,7 +44,7 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: KomponistViewHolder, position: Int) {
-        holder.titleTextView.text = mKomponistList[position].Komponist
+        holder.titleTextView.text = mKomponistList[position].komponist
 //        holder.detailTextView1.text = mKomponistList[position].geboren
 //        holder.detailTextView2.text = mKomponistList[position].gestorben
     }
@@ -63,7 +63,7 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 var charString = charSequence.toString()
-                charString = charString.toLowerCase(Locale.getDefault())
+                charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
                     mKomponistList = mKomponistList // filtering starts
                     charStringOld = charString
@@ -74,7 +74,7 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
                 } else {
                     val filteredList: MutableList<KomponistClass> = ArrayList()
                     for (row in mKomponistList) {
-                        if (row.Komponist.toLowerCase(Locale.getDefault()).contains(charString)) {
+                        if (row.komponist.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }

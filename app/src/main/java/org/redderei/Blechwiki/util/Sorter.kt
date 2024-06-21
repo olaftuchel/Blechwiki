@@ -25,8 +25,8 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
             Collections.sort(adapter.mKomponistList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
-                    val komponist1 = (ob1 as KomponistClass).Komponist
-                    val komponist2 = (ob2 as KomponistClass).Komponist
+                    val komponist1 = (ob1 as KomponistClass).komponist
+                    val komponist2 = (ob2 as KomponistClass).komponist
                     return germanCollator.compare(komponist1, komponist2)
                 }
             })
@@ -39,8 +39,8 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
             Collections.sort(adapter.mTitelList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
-                    val titel1 = (ob1 as TitelClass).Titel
-                    val titel2 = (ob2 as TitelClass).Titel
+                    val titel1 = (ob1 as TitelClass).titel
+                    val titel2 = (ob2 as TitelClass).titel
                     return germanCollator.compare(titel1, titel2)
                 }
             })
@@ -52,8 +52,8 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
             Collections.sort(adapter!!.mList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
-                    val buch1 = (ob1 as TitelInBuchClass).buchTitel
-                    val buch2 = (ob2 as TitelInBuchClass).buchTitel
+                    val buch1 = (ob1 as TitelInBuchClass).buch
+                    val buch2 = (ob2 as TitelInBuchClass).buch
                     return germanCollator.compare(buch1, buch2)
                 }
             })
@@ -65,8 +65,8 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
             Collections.sort(adapter!!.mList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
-                    val buch1 = (ob1 as TitelInBuchClass).buchTitel
-                    val buch2 = (ob2 as TitelInBuchClass).buchTitel
+                    val buch1 = (ob1 as TitelInBuchClass).buch
+                    val buch2 = (ob2 as TitelInBuchClass).buch
                     return germanCollator.compare(buch1, buch2)
                 }
             })

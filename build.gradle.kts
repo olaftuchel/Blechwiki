@@ -1,7 +1,7 @@
 plugins {
     //trick: for the same plugin versions in all sub-modules
-    id("com.android.application").version("8.3.0").apply(false)
-    kotlin("android").version("1.9.21").apply(false)
+    id("com.android.application").version("8.3.2").apply(false)
+     kotlin("android").version("1.9.21").apply(false)
     kotlin("jvm").version("1.9.21").apply(false)
     id("com.google.devtools.ksp").version("1.9.21-1.0.16").apply(false)
 }

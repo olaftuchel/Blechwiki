@@ -29,35 +29,35 @@ interface BlechDao {
 
     // Lieder
     @Query("SELECT * FROM lied_table WHERE ((teil = 'Stamm' OR teil = :kirche) AND lied LIKE '%' || :query || '%') ORDER BY lied COLLATE LOCALIZED ASC")
-    fun getAllLiederSortABC(kirche: String, query: String): LiveData<List<LiedClass>>
+    fun getAllLiedSortABC(kirche: String, query: String): LiveData<List<LiedClass>>
 
     @Query("SELECT * FROM lied_table WHERE ((teil = 'Stamm' OR teil = :kirche) AND lied LIKE '%' || :query || '%') ORDER BY CAST (nr AS INTEGER)")
-    fun getAllLiederSortNr(kirche: String, query: String): LiveData<List<LiedClass>>
+    fun getAllLiedSortNr(kirche: String, query: String): LiveData<List<LiedClass>>
 
     @Query("SELECT * FROM lied_table WHERE ((teil = 'Stamm' OR teil = :kirche) AND lied LIKE '%' || :query || '%') ORDER BY anlass ASC")
-    fun getAllLiederSortAnlass(kirche: String, query: String): LiveData<List<LiedClass>>
+    fun getAllLiedSortAnlass(kirche: String, query: String): LiveData<List<LiedClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(lied: LiedClass)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAllLieder(lied: List<LiedClass>)
+    fun insertAllLied(lied: List<LiedClass>)
 
     @Query("DELETE FROM lied_table")
-    fun deleteAllLieder()
+    fun deleteAllLied()
 
     // Buecher
     @Query("SELECT * FROM buch_table WHERE (buch LIKE '%' || :query || '%') ORDER BY buch COLLATE LOCALIZED ASC")
-    fun getAllBuecher(query: String?): LiveData<List<BuchClass>>
+    fun getAllBuch(query: String?): LiveData<List<BuchClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(buch: BuchClass)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertBuecher(buch: List<BuchClass>)
+    suspend fun insertAllBuch(buch: List<BuchClass>)
 
     @Query("DELETE FROM buch_table")
-    fun deleteAllBuecher()
+    fun deleteAllBuch()
 
     // Komponisten
     @Query("SELECT * FROM komponist_table WHERE (komponist LIKE '%' || :query || '%') ORDER BY komponist COLLATE LOCALIZED ASC")
@@ -67,7 +67,7 @@ interface BlechDao {
     fun insert(komponist: KomponistClass)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAllKomponisten(komponist: List<KomponistClass>)
+    fun insertAllKomponist(komponist: List<KomponistClass>)
 
     @Query("DELETE FROM komponist_table")
     fun deleteAllKomponist()
