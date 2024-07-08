@@ -17,7 +17,7 @@ interface RestInterface {
     fun getLiedList () : Call<List<LiedClass>>
 
     @GET("Version")
-    fun getBuchList(   // query: xxx
+    fun getBuchList(   // query:
         @Query("Tabelle") type: String,
         @Query("counter") count: String) : Call<List<BuchClass>>
 

@@ -60,7 +60,11 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
         //Log.v("BuchAdapter", "onBindViewHolder");
         holder.titleTextView.text = mBuchList[position].buch
         holder.subtitleTextView.text = mBuchList[position].untertitel
-        holder.detailTextView.text = mBuchList[position].erscheinjahr
+        if (mBuchList[position].erscheinjahr != "0") {
+            holder.detailTextView.text = mBuchList[position].erscheinjahr
+        } else {
+            holder.detailTextView.text = ""
+        }
         Picasso.get().load(Constant.miniImgURL + mBuchList[position].buchkurz + ".jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
     }
 

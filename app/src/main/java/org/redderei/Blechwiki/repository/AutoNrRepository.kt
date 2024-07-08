@@ -26,7 +26,7 @@ class AutoNrRepository internal constructor(app: Application) {
      */
     val getAutoNr: Unit
         get() {
-            Log.v("AutoNrRepository", "getGetAutoNr, get: StoreVars .autoNrBuch ${StoreVars.instance.autoNrBuch}, " +
+            Log.v("AutoNrRepository", "getGetAutoNr, get: StoreVars autoNrBuch ${StoreVars.instance.autoNrBuch}, " +
                         "autoNrKomponist=${StoreVars.instance.autoNrKomponist}, autoNrTitel=${StoreVars.instance.autoNrTitel}")
             // app didn't store preferences so far, initialize them
             if (!sharedPreference.getValueBoolean(Constant.PREF_INITIALIZED, false)) {
@@ -38,10 +38,11 @@ class AutoNrRepository internal constructor(app: Application) {
                 sharedPreference.save(Constant.PREF_AUTO_NR_BUCH, -1)
                 sharedPreference.save(Constant.PREF_AUTO_NR_KOMPONIST, -1)
                 sharedPreference.save(Constant.PREF_AUTO_NR_TITEL, -1)
+                sharedPreference.save(Constant.PREF_INITIALIZED, true)
             }
             if (StoreVars.instance.autoNrBuch == 0) { // query AutoNr just directly after program start
 //                if (StoreVars.instance.autoNrBuch > sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)) { // latest run of this program received lower values
-                    Log.v("AutoNrRepository", "getGetAutoNr runs again on machine, " +
+                Log.v("AutoNrRepository", "getGetAutoNr runs again on machine, " +
                             "compare local data serial PrefAutoNrBuch=" + sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) +
                             " StoreVars.autoNrBuch" + StoreVars.instance.autoNrBuch)
                 val destinationService = ServiceBuilder.buildService(RestInterface::class.java)
@@ -54,9 +55,9 @@ class AutoNrRepository internal constructor(app: Application) {
                             sharedPreference.save(Constant.PREF_INITIALIZED, true)
                             val AutoNrString = response.body()!!
 //                            Log.d("AutoNrRepository", "getAutoNr onResponse AutoNrString= ${AutoNrString}")
-                            StoreVars.instance.autoNrBuch = AutoNrString.AutoNr.get(0).lastNr         // with SOAP was lastNr +1
-                            StoreVars.instance.autoNrKomponist = AutoNrString.AutoNr.get(1).lastNr
-                            StoreVars.instance.autoNrTitel = AutoNrString.AutoNr.get(2).lastNr
+                            StoreVars.instance.autoNrBuch = AutoNrString.AutoNr.get(0).lastNr       // Buch
+                            StoreVars.instance.autoNrKomponist = AutoNrString.AutoNr.get(1).lastNr  // Komponist
+                            StoreVars.instance.autoNrTitel = AutoNrString.AutoNr.get(2).lastNr      // Titel
                             Log.d("AutoNrRepository", "getGetAutoNr: autoNrBuch=" + StoreVars.instance.autoNrBuch
                                         + " autoNrKomponist=" + StoreVars.instance.autoNrKomponist + " autoNrTitel=" + StoreVars.instance.autoNrTitel)
                             //in case of different values reset it -> data are dropped and pulled again
@@ -86,12 +87,6 @@ class AutoNrRepository internal constructor(app: Application) {
                 })
 //                }
             }
-        }
-
-    val getLastNr: Unit
-        get() {
-            Log.v("AutoNrRepository", "getLastNr")
-            mBlechDao.getMaxBuchId()
         }
 
     init {

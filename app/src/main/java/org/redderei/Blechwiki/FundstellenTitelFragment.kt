@@ -19,8 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 import org.redderei.Blechwiki.adapter.TitelInBuchAdapter
-import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.buchFundstellen
-import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.komponistFundstellen
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.getBuchFundstellen
 import org.redderei.Blechwiki.repository.BuchViewModel
 import org.redderei.Blechwiki.repository.KomponistViewModel
 import org.redderei.Blechwiki.util.RecyclerTouchListener
@@ -64,12 +63,12 @@ class FundstellenTitelFragment : Fragment() {
         Log.d("FundstellenTitelFragment", "onCreate")
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        if (requireArguments().containsKey(FundstellenTitelFragment.Companion.ARG_ITEM_BUCH)) {
-            searchString = requireArguments().getString(FundstellenTitelFragment.Companion.ARG_ITEM_BUCH).toString()
+        if (requireArguments().containsKey(ARG_ITEM_BUCH)) {
+            searchString = requireArguments().getString(ARG_ITEM_BUCH).toString()
             val clickAction = "GetBuchFundstellen"
             sortType = "Nr"
             Log.d("FundstellenTitelFragment", "onCreate ARG_ITEM_BUCH, searchString=$searchString")
-            mAdapter = TitelInBuchAdapter(buchFundstellen, mBuchListView)
+            mAdapter = TitelInBuchAdapter(getBuchFundstellen, mBuchListView)
             buchViewModel = ViewModelProvider(this).get(BuchViewModel::class.java)
             GlobalScope.launch(Dispatchers.IO) {
                 withContext(Dispatchers.Main) {
@@ -84,12 +83,12 @@ class FundstellenTitelFragment : Fragment() {
                         }
                 }
             }
-        } else if (requireArguments().containsKey(FundstellenTitelFragment.Companion.ARG_ITEM_KOMPONIST)) {
-            searchString = requireArguments().getString(FundstellenTitelFragment.Companion.ARG_ITEM_KOMPONIST).toString()
+        } else if (requireArguments().containsKey(ARG_ITEM_KOMPONIST)) {
+            searchString = requireArguments().getString(ARG_ITEM_KOMPONIST).toString()
             val clickAction = "GetKomponistFundstellen"
             sortType = "ABC"
             Log.d("FundstellenTitelFragment", "onCreate ARG_ITEM_TITEL, searchString=$searchString")
-            mAdapter = TitelInBuchAdapter(komponistFundstellen, mBuchListView)
+            mAdapter = TitelInBuchAdapter(TitelInBuchClass.Companion.getKomponistFundstellen, mBuchListView)
             komponistViewModel = ViewModelProvider(this).get(KomponistViewModel::class.java)
             GlobalScope.launch(Dispatchers.IO) {
                 withContext(Dispatchers.Main) {
@@ -154,32 +153,7 @@ class FundstellenTitelFragment : Fragment() {
         val index = mapIndex!![selectedIndex.text]!!
         recyclerView!!.layoutManager!!.scrollToPosition(index)
     }
-/**
-    fun soapQuery() {
-        Log.d("FundstellenTitelFragment", "(soapQuery)")
-        val mOnClickListener: View.OnClickListener
-        mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
-        mContext = requireActivity().applicationContext as Context
-        soapTask = SoapTask(mContext)
-        soapTask!!.setDownloadCompleteListener(object : SoapTask.DownloadCompleteListener {
-            override fun onUpdate(mBuchListView: List<*>?) {
-                Log.v("FundstellenTitelFragment", "onUpdate")
-                if (soapTask!!.isCancelled) {
-                    Toast.makeText(context, "FundstellenTitelFragment: Network Error", Toast.LENGTH_SHORT).show()
-                } else {
-                    mAdapter.filter.filter("") {
-                        mapIndex = SideIndex.getFundstellenBuchIndexList(mAdapter, sortType)
-                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                    }
-                }
-            }
-        })
-        soapTask!!.execute(clickAction, searchString, mBuchListView)
-        if (soapTask!!.isCancelled) {
-            Toast.makeText(context, "FundstellenTitel: Network Error", Toast.LENGTH_SHORT).show()
-        }
-    }
-*/
+
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         Log.d("FundstellenTitelFragment", "onCreateOptionsMenu")

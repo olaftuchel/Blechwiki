@@ -5,6 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Delete
+import androidx.room.Update
 import org.redderei.Blechwiki.gettersetter.LiedClass
 import org.redderei.Blechwiki.gettersetter.BuchClass
 import org.redderei.Blechwiki.gettersetter.KomponistClass
@@ -43,61 +45,49 @@ interface BlechDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAllLied(lied: List<LiedClass>)
 
-    @Query("DELETE FROM lied_table")
-    fun deleteAllLied()
+    @Delete
+    fun delete(lied: LiedClass)
 
     // Buecher
     @Query("SELECT * FROM buch_table WHERE (buch LIKE '%' || :query || '%') ORDER BY buch COLLATE LOCALIZED ASC")
     fun getAllBuch(query: String?): LiveData<List<BuchClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(buch: BuchClass)
+    suspend fun insertBuch(buch: List<BuchClass>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAllBuch(buch: List<BuchClass>)
+    @Delete()
+    suspend fun deleteBuch(buch: List<BuchClass>)
 
-    @Query("DELETE FROM buch_table")
-    fun deleteAllBuch()
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateBuch(buch: List<BuchClass>)
 
     // Komponisten
     @Query("SELECT * FROM komponist_table WHERE (komponist LIKE '%' || :query || '%') ORDER BY komponist COLLATE LOCALIZED ASC")
     fun getAllKomponist(query: String?): LiveData<List<KomponistClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(komponist: KomponistClass)
+    fun insertKomponist(komponist: List<KomponistClass>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAllKomponist(komponist: List<KomponistClass>)
+    @Delete()
+    fun deleteKomponist(komponist: List<KomponistClass>)
 
-    @Query("DELETE FROM komponist_table")
-    fun deleteAllKomponist()
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun updateKomponist(komponist: List<KomponistClass>)
 
     // Titel
     @Query("SELECT * FROM titel_table WHERE (titel LIKE '%' || :query || '%') ORDER BY titel COLLATE LOCALIZED ASC")
     fun getAllTitel(query: String): LiveData<List<TitelClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(titel: TitelClass)
+    fun insertTitel(titel: List<TitelClass>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAllTitel(titel: List<TitelClass>)
+    @Delete()
+    fun deleteTitel(titel: List<TitelClass>)
 
-    @Query("DELETE FROM titel_table")
-    fun deleteAllTitel()
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun updateTitel(titel: List<TitelClass>)
 
     @Query("SELECT * FROM titel_table WHERE (titel LIKE '%' || :query || '%' OR titel_ohne_komma LIKE '%' || :query || '%') " +
                 "ORDER BY titel COLLATE LOCALIZED ASC")
     fun getAllTitelKomma(query: String): LiveData<List<TitelClass>>
-
-    @Query("SELECT MAX(changecounter) AS max_changecounter FROM buch_table")
-    fun getMaxChangecounterBuch(): Int
-
-    @Query("SELECT MAX(changecounter) AS max_changecounter FROM komponist_table")
-    fun getMaxChangecounterKomponist(): Int
-
-    @Query("SELECT MAX(changecounter) AS max_changecounter FROM titel_table")
-    fun getMaxChangecounterTitel(): Int
-
-    @Query("SELECT MAX(buchId) AS max_maxbuchid FROM buch_table")
-    fun getMaxBuchId(): Int
 }

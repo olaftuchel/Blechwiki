@@ -25,7 +25,9 @@ import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
   //   the UI when the data actually changes.
   // - Repository is completely separated from the UI through the ViewModel.
 
-*/
+ created multiple viewmodels and repositories due to overlapping threats from different fragments
+ this one may be a possible solution: https://developer.android.com/topic/libraries/architecture/coroutines?hl=de
+ */
 
 class LiedViewModel(app: Application) : AndroidViewModel(app) {
     private val mRepository: LiedRepository

@@ -28,20 +28,27 @@ import retrofit2.Response
 class KomponistRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
     val sharedPreference: SharedPreference = SharedPreference(appContext)
+    var changecounter: Int = 0
 
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
     suspend fun getAllKomponist(query: String): LiveData<List<KomponistClass>>? {
 
         Log.d("KomponistRepository", "getAllKomponist: query=>${query}< sharedPreference AutoNrKomponist="
-                + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST)}, StoreVars.autoNrKomponist=${StoreVars.instance.autoNrKomponist}")
+                    + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST)}, StoreVars.autoNrKomponist=${StoreVars.instance.autoNrKomponist}")
 
         // no data there yet or part of it missing
         if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST) < StoreVars.instance.autoNrKomponist) {
-            Log.d("KomponistRepository", "getAllKomponist): refresh data from REST server")
+            if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST) == -1) {
+                Log.d("KomponistRepository", "getAllKomponist: fetch initial dataset from REST server")
+            } else {
+                // anything else than changecounter = StoreVars.instance.autoNrKomponist
+                changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_KOMPONIST)
+                Log.d("KomponistRepository", "getAllKomponist: refresh data from REST server, changecounter= ${changecounter}")
+            }
 
             val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = restBlechwiki.getKomponistList("Komponist", "0")
+            val call = restBlechwiki.getKomponistList("Komponist", changecounter.toString())
             call.enqueue(object : Callback<List<KomponistClass>> {
                 override fun onResponse(
                     call: Call<List<KomponistClass>>,
@@ -50,11 +57,9 @@ class KomponistRepository internal constructor(app: Application) {
                     Log.d("KomponistRepository", "getAllKomponist: onResponse, we got ${restResponse.body()}")
                     if (restResponse.isSuccessful) {
                         Log.d("KomponistRepository", "Response: Komponist size : ${restResponse.body()?.size}")
-//                        restResponse.body()?.forEach{insertKomponist(it)}
-//                        val tableListinsert: List<KomponistClass> = restResponse.filter{it.change == "new" }    // .filter{it.change == "new"}
                         if (restResponse.body()!!.isNotEmpty()) {
                             val tableListinsert: List<KomponistClass> = restResponse.body()!!
-                            GlobalScope.launch { insertAllKomponist(tableListinsert) }
+                            GlobalScope.launch { modifyAllKomponist(changecounter, tableListinsert)}
                             sharedPreference.save(Constant.PREF_AUTO_NR_KOMPONIST, StoreVars.instance.autoNrKomponist)
                             Log.d("KomponistRepository", "getAllKomponist: onResponse, saved Constant.PREF_AUTO_NR_KOMPONIST = StoreVars.instance.autoNrKomponist = ${StoreVars.instance.autoNrKomponist}")
                         }
@@ -70,29 +75,50 @@ class KomponistRepository internal constructor(app: Application) {
                 override fun onFailure(call: Call<List<KomponistClass>>, t: Throwable) {
                     Log.d("KomponistRepository (getAllKomponist): onFailure", "Something went wrong $t")
                     Toast.makeText(
-                        appContext,
-                        "KomponistRepository (getAllKomponist): Error $t",
+                        appContext,"KomponistRepository (getAllKomponist): Error $t",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             })
-
-        } else {
-            Log.d("KomponistRepository", "getAllKomponist: no new data available")
         }
-        Log.d("KomponistRepository", "KomponistRepository: try to fetch Komponist from database")
+        Log.d("KomponistRepository", "KomponistRepository: fetch Komponist from database")
         return mBlechDao.getAllKomponist(query)
     }
 
-    suspend fun insertKomponist(Komponist: KomponistClass) {
-        Log.v("KomponistRepository", "insertKomponist " + Komponist.komponist);
-        mBlechDao.insert(Komponist);
+    suspend fun modifyAllKomponist(changecounter: Int, komponist: List<KomponistClass>) {
+        Log.v("KomponistRepository", "modifyAllKomponist, changecounter = ${changecounter}, size= ${komponist.size}");
+        if (changecounter == 0) {      // initial call
+            mBlechDao.insertKomponist(komponist);
+        } else {                // update, delete, add
+            deleteKomponist(komponist.filter{it.change == "delete"})
+            newKomponist(komponist.filter{it.change == "new"})
+            updateKomponist(komponist.filter{it.change == "update"})
+        }
+        // maximum value of last changecounter
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_KOMPONIST, komponist.maxOf{p -> p.changecounter})
     }
 
-    suspend fun insertAllKomponist(komponistList: List<KomponistClass>) {
-        Log.v("KomponistRepository", "insertAllKomponist " + komponistList.size);
-        mBlechDao.insertAllKomponist(komponistList);
+    suspend fun newKomponist(Komponist: List<KomponistClass>) {
+        Log.v("KomponistRepository", "newKomponist, size: " + Komponist.size);
+        if (Komponist.size > 0) {
+            mBlechDao.insertKomponist(Komponist);
+        }
     }
+
+    suspend fun deleteKomponist(Komponist: List<KomponistClass>) {
+        Log.v("KomponistRepository", "deleteKomponist, size: " + Komponist.size);
+        if (Komponist.size > 0) {
+            mBlechDao.deleteKomponist(Komponist);
+        }
+    }
+
+    suspend fun updateKomponist(Komponist: List<KomponistClass>) {
+        Log.v("KomponistRepository", "updateKomponist, size: " + Komponist.size);
+        if (Komponist.size > 0) {
+            mBlechDao.updateKomponist(Komponist);
+        }
+    }
+
     suspend fun getKomponistDetails(komponistNr: Int): MutableLiveData<List<TitelInBuchClass>> {
         Log.d("KomponistRepository", "getKomponistDetails $komponistNr")
         val tableListinsert = MutableLiveData<List<TitelInBuchClass>>() // = emptyList()
@@ -106,7 +132,7 @@ class KomponistRepository internal constructor(app: Application) {
             ) {
                 Log.d("getKomponistDetails","onResponse: we got ${restResponse.body()}")
                 if (restResponse.isSuccessful) {
-                    Log.d("getKomponistDetails","Response: Buch size : ${restResponse.body()?.size}")
+                    Log.d("getKomponistDetails","Response: Komponist size : ${restResponse.body()?.size}")
                     if (restResponse.body()!!.isNotEmpty()) {
                         tableListinsert.value = restResponse.body()
                     }
@@ -131,12 +157,12 @@ class KomponistRepository internal constructor(app: Application) {
         Log.d("KomponistRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-
+/*
         // initialize store for global variables
         if (StoreVars.instance.autoNrKomponist == 0) {
             val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
             autoNrViewModel.getAutoNr
             Log.d("KomponistRepository", "init: autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
         }
-    }
+*/    }
 }

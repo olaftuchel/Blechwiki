@@ -23,16 +23,12 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
 
     class KomponistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var titleTextView: TextView
-        var detailTextView1: TextView
-        var detailTextView2: TextView
         fun bind(item: KomponistClass) {
             titleTextView.text = item.komponist
         }
 
         init {
             titleTextView = itemView.findViewById<View>(R.id.komponist_list) as TextView
-            detailTextView1 = itemView.findViewById<View>(R.id.komponist_list_geboren) as TextView
-            detailTextView2 = itemView.findViewById<View>(R.id.komponist_list_gestorben) as TextView
         }
     }
 

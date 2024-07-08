@@ -55,12 +55,12 @@ class TitelFragment : Fragment(), View.OnClickListener {
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 titelViewModel!!.getAllTitel("")?.observe(appContext) { titel -> // Update the cached copy of the words in the adapter.
-                    Log.v("TitelFragment", "onCreate: mAdapter changed ")
-                    mAdapter!!.setListEntries(titel)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getTitelIndexList(mAdapter!!)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                }
+                        Log.v("TitelFragment", "onCreate: mAdapter changed ")
+                        mAdapter!!.setListEntries(titel)
+                        // calculate Index List and show it up
+                        mapIndex = SideIndex.getTitelIndexList(mAdapter!!)
+                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                    }
             }
         }
     }

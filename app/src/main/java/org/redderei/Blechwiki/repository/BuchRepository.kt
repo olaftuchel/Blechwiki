@@ -20,20 +20,23 @@ import retrofit2.Response
 class BuchRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
     val sharedPreference: SharedPreference = SharedPreference(appContext)
+    var changecounter: Int = 0
 
     suspend fun getAllBuch(query: String): LiveData<List<BuchClass>>? {
         Log.d("BuchRepository", "getAllBuch: query=>${query}<, sharedPreference AutoNrBuch=" +
                 "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}, StoreVars.autoNrBuch=${StoreVars.instance.autoNrBuch}")
-
-        // no data there yet or part of it missing
         if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) < StoreVars.instance.autoNrBuch) {
-            Log.d("BuchRepository", "getAllBuch: refresh data from REST server")
+            // no data there yet or part of it changed
+            if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) == -1) {
+                Log.d("BuchRepository", "getAllBuch: fetch initial dataset from REST server")
+            } else {
+                // anything else than changecounter = StoreVars.instance.autoNrBuch
+                changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_BUCH)
+                Log.d("BuchRepository", "getAllBuch: refresh data from REST server, changecounter= ${changecounter}")
+            }
 
-            val destinationService = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = destinationService.getBuchList("Buch", "0")
-            // works well
-//            val destinationService = ServiceBuilder.buildService(RestGetBuchList::class.java)
-//            val call = destinationService.getBuchList()
+            val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
+            val call = restBlechwiki.getBuchList("Buch", changecounter.toString())
             call.enqueue(object : Callback<List<BuchClass>> {
                 override fun onResponse(
                     call: Call<List<BuchClass>>,
@@ -42,13 +45,9 @@ class BuchRepository internal constructor(app: Application) {
                     Log.d("BuchRepository", "getAllBuch: onResponse, we got ${restResponse.body()}")
                     if (restResponse.isSuccessful) {
                         Log.d("BuchRepository", "getAllBuch: Buch size : ${restResponse.body()?.size}")
-//                        restResponse.body()?.forEach{insertBuch(it)}
-//                        val tableListinsert: List<BuchClass> = restResponse.filter{it.change == "new" }    // .filter{it.change == "new"}
                         if (restResponse.body()!!.isNotEmpty()) {
                             val tableListinsert: List<BuchClass> = restResponse.body()!!
-                            GlobalScope.launch { insertAllBuch(tableListinsert) }
-                            sharedPreference.save(Constant.PREF_AUTO_NR_BUCH, StoreVars.instance.autoNrBuch)
-                            Log.d("BuchRepository", "getAllBuch: onResponse, saved Constant.PREF_AUTO_NR_BUCH = StoreVars.instance.autoNrBuch = ${StoreVars.instance.autoNrBuch}")
+                            GlobalScope.launch { modifyAllBuch(changecounter, tableListinsert) }
                         }
                     } else {
                         Log.d("BuchRepository", "getAllBuch: onResponse, no success in retrieving data, ${restResponse.message()}")
@@ -69,18 +68,45 @@ class BuchRepository internal constructor(app: Application) {
                 }
             })
         }
-        Log.d("BuchRepository", "try to fetch Buch from database")
+        Log.d("BuchRepository", "fetch Buch from database")
         return mBlechDao.getAllBuch(query)
     }
 
-    suspend fun insertBuch(buch: BuchClass) {
-        Log.v("BuchRepository", "insertBuch) " + buch.buch);
-        mBlechDao.insert(buch);
+    suspend fun modifyAllBuch(changecounter: Int, buch: List<BuchClass>) {
+        Log.v("BuchRepository", "modifyAllBuch, changecounter = ${changecounter}, size= ${buch.size}");
+        if (changecounter == 0) {      // initial call
+            mBlechDao.insertBuch(buch);
+        } else {                // update, delete, add
+            deleteBuch(buch.filter{it.change == "delete"})
+            newBuch(buch.filter{it.change == "new"})
+            updateBuch(buch.filter{it.change == "update"})
+        }
+        // maximum value of last changecounter
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_BUCH, buch.maxOf{p -> p.changecounter})
+        sharedPreference.save(Constant.PREF_AUTO_NR_BUCH, StoreVars.instance.autoNrBuch)
+        Log.d("BuchRepository", "modifyAllBuch: saved Constant.PREF_AUTO_NR_BUCH = " +
+                "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}")
     }
 
-    suspend fun insertAllBuch(buchList: List<BuchClass>) {
-        Log.v("BuchRepository", "insertAllBuch, size= " + buchList.size);
-        mBlechDao.insertAllBuch(buchList);
+    suspend fun newBuch(buch: List<BuchClass>) {
+        Log.v("BuchRepository", "newBuch, size: " + buch.size);
+        if (buch.size > 0) {
+            mBlechDao.insertBuch(buch);
+        }
+    }
+
+    suspend fun deleteBuch(buch: List<BuchClass>) {
+        Log.v("BuchRepository", "deleteBuch, size: " + buch.size);
+        if (buch.size > 0) {
+            mBlechDao.deleteBuch(buch);
+        }
+    }
+
+    suspend fun updateBuch(buch: List<BuchClass>) {
+        Log.v("BuchRepository", "updateBuch, size: " + buch.size);
+        if (buch.size > 0) {
+            mBlechDao.updateBuch(buch);
+        }
     }
 
     suspend fun getBuchDetails(buchNr: Int): MutableLiveData<List<TitelInBuchClass>> {
@@ -118,16 +144,16 @@ class BuchRepository internal constructor(app: Application) {
 
     init {
         // initialize database connection
-        Log.d("BuchRepository", "init)")
+        Log.d("BuchRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-
+/*
         // initialize store for global variables
         if (StoreVars.instance.autoNrBuch == 0) {
             val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
             autoNrViewModel.getAutoNr
             Log.d("BuchRepository", "init: StoreVars, autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
         }
-    }
+*/    }
 }
 

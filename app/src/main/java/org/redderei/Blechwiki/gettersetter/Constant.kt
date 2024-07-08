@@ -12,6 +12,9 @@ object Constant {
     const val PREF_AUTO_NR_BUCH = "AutoNrBuch"
     const val PREF_AUTO_NR_KOMPONIST = "AutoNrKomponist"
     const val PREF_AUTO_NR_TITEL = "AutoNrTitel"
+    const val PREF_CHANGECOUNTER_BUCH = "ChangecounterBuch"
+    const val PREF_CHANGECOUNTER_KOMPONIST = "ChangecounterKomponist"
+    const val PREF_CHANGECOUNTER_TITEL = "ChangecounterTitel"
     // need same order of arrays below
     val mBuchLang = arrayOf("Baden/Elsaß/Lothringen", "Bayern/Thüringen", "Hessen-Nassau", "Kurhessen-Waldeck", "Mecklenburg", "Niedersachsen/Bremen", "Nordelbien", "Oldenburg",
             "Österreich", "Pfalz", "Reformierte", "Rheinland/Westfalen/Lippe", "Württemberg", "alle Anhänge")

@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.adapter.TitelInBuchAdapter
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
-import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.titelFundstellen
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.getTitelFundstellen
 import org.redderei.Blechwiki.repository.TitelViewModel
 import org.redderei.Blechwiki.util.RecyclerTouchListener
 import org.redderei.Blechwiki.util.SideIndex
@@ -65,7 +65,7 @@ class FundstellenBuchFragment: Fragment() {
         searchString = requireArguments().getString(ARG_ITEM_TITEL_IX).toString()
         requireActivity().title = requireArguments().getString(ARG_ITEM_TITEL).toString()
         Log.d("FundstellenBuchFragment", "onCreate ARG_ITEM_TITEL_IX searchString=$searchString")
-        mAdapter = TitelInBuchAdapter(titelFundstellen, mTitelListView)
+        mAdapter = TitelInBuchAdapter(getTitelFundstellen, mTitelListView)
         titelViewModel = ViewModelProvider(this).get(TitelViewModel::class.java)
         // Update the cached copy of the words in the adapter.
         GlobalScope.launch(Dispatchers.IO) {

@@ -56,13 +56,13 @@ class KomponistFragment : Fragment(), View.OnClickListener {
         komponistViewModel = ViewModelProvider(this).get(KomponistViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                komponistViewModel!!.getAllKomponist("0")?.observe(appContext, { komponist -> // Update the cached copy of the words in the adapter.
-                    Log.d("KomponistFragment", "onCreate: mAdapter changed ")
-                    mAdapter!!.setListEntries(komponist)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getKomponistIndexList(mAdapter!!)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                })
+                komponistViewModel!!.getAllKomponist("")?.observe(appContext) { komponist -> // Update the cached copy of the words in the adapter.
+                        Log.d("KomponistFragment", "onCreate: mAdapter changed ")
+                        mAdapter!!.setListEntries(komponist)
+                        // calculate Index List and show it up
+                        mapIndex = SideIndex.getKomponistIndexList(mAdapter!!)
+                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                    }
             }
         }
     }

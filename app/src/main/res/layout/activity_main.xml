@@ -25,7 +25,7 @@
             android:id="@+id/sliding_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FDCB4E"
+            android:background="#F9E793"
             app:tabMode="fixed"
             app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
             style="@style/SlidingTabs"/>

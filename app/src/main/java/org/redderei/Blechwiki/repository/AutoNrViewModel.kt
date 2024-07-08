@@ -20,13 +20,6 @@ class AutoNrViewModel(app: Application) : AndroidViewModel(app) {
             return
         }
 
-    val getLastNr: Unit
-        get() {
-            Log.d("AutoNrViewModel", "getLastNr")
-            mRepository.getLastNr
-            return
-        }
-
     // LiveData is a data holder class that can be observed within a given lifecycle. This means
     // that an Observer can be added in a pair with a LifecycleOwner, and this observer will be
     // notified about modifications of the wrapped data only if the paired LifecycleOwner is in active state.

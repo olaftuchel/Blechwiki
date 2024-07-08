@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuItemCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,14 +18,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.adapter.TitelInBuchAdapter
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
-import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.egLiedFundstellen
+import org.redderei.Blechwiki.gettersetter.TitelInBuchClass.Companion.getEgLiedFundstellen
 import org.redderei.Blechwiki.repository.LiedViewModel
-import org.redderei.Blechwiki.util.ActivityLifeCycleObserver
 import org.redderei.Blechwiki.util.RecyclerTouchListener
 import org.redderei.Blechwiki.util.SideIndex
+import org.redderei.Blechwiki.util.Sorter
 import java.util.*
 
 /**
@@ -63,7 +60,7 @@ class FundstellenLiedFragment : Fragment(), View.OnClickListener {
         searchString = requireArguments().getString(ARG_ITEM_IXUR).toString()
         requireActivity().title = requireArguments().getString(ARG_ITEM_LIED).toString()
         Log.d("FundstellenLiedFragment", "onCreate ARG_ITEM_LIED searchString=$searchString")
-        mAdapter = TitelInBuchAdapter(egLiedFundstellen, mTitelInBuchList)
+        mAdapter = TitelInBuchAdapter(getEgLiedFundstellen, mTitelInBuchList)
         liedViewModel = ViewModelProvider(this).get(LiedViewModel::class.java)
         // Update the cached copy of the words in the adapter.
         GlobalScope.launch(Dispatchers.IO) {
@@ -72,6 +69,7 @@ class FundstellenLiedFragment : Fragment(), View.OnClickListener {
                     {buecher: List<TitelInBuchClass> ->
                         Log.v("FundstellenLiedFragment", "onCreate: onChanged: mAdapter changed")
                         mAdapter.setListEntries(buecher)
+                        Sorter.sortFundstellenLied(mAdapter, -1)
                         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
                         // calculate Index List and show it up
                         mapIndex = SideIndex.getFundstellenBuchIndexList(mAdapter, sortType)
@@ -96,7 +94,7 @@ class FundstellenLiedFragment : Fragment(), View.OnClickListener {
         recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView,
             object: RecyclerTouchListener.ClickListener {
             override fun onClick(view: View?, position: Int) {  // show main buch properties
-                Toast.makeText(getContext(), "FundstellenLiedFragment(onCreateView(onClick)), position="+position, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "FundstellenLiedFragment(onCreateView(onClick)), position="+position, Toast.LENGTH_SHORT).show();
             }
 
             override fun onLongClick(view: View?, position: Int) {}

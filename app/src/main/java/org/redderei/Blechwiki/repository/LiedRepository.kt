@@ -142,7 +142,7 @@ class LiedRepository internal constructor(app: Application) {
     }
 
     suspend fun insertAllLied(liedList: List<LiedClass>) {
-        Log.v("LiedRepository", "insertAllLied" + liedList.size);
+        Log.v("LiedRepository", "insertAllLied " + liedList.size);
         mBlechDao.insertAllLied(liedList);
     }
 
@@ -151,13 +151,6 @@ class LiedRepository internal constructor(app: Application) {
         Log.d("LiedRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-
-        // initialize store for global variables
-        if (StoreVars.instance.autoNrBuch == 0) {
-            val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
-            autoNrViewModel.getAutoNr
-            Log.d("LiedRepository", "init: StoreVars, autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
-        }
     }
 }
 

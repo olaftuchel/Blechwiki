@@ -73,5 +73,6 @@ dependencies {
     //coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    //livedata
     implementation(libs.androidx.lifecycle.livedata.ktx)
 }

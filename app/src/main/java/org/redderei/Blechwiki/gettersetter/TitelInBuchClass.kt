@@ -18,9 +18,9 @@ class TitelInBuchClass {
 
     companion object {
         // possible values of detaillistitemtype
-        const val egLiedFundstellen = 1
-        const val buchFundstellen = 2
-        const val komponistFundstellen = 3
-        const val titelFundstellen = 4
+        const val getEgLiedFundstellen = 1
+        const val getBuchFundstellen = 2
+        const val getKomponistFundstellen = 3
+        const val getTitelFundstellen = 4
     }
 }

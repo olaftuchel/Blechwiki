@@ -1,5 +1,6 @@
 package org.redderei.Blechwiki
 
+
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -12,14 +13,14 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.LiedClass
@@ -47,6 +48,10 @@ class LiedFragment : Fragment(), View.OnClickListener {
     private val mDualPane = false
     private var liedViewModel: LiedViewModel? = null
     private val sharedPreference: SharedPreference = SharedPreference(appContext)
+    // Job and Dispatcher are combined into a CoroutineContext
+    // https://developer.android.com/kotlin/coroutines/coroutines-adv?hl=de
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
+
 
     // The current activated item position. Only used on tablets
     private var mActivatedPosition = ListView.INVALID_POSITION
@@ -62,8 +67,8 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(  "LiedFragment", "onCreate ")
-        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
+        Log.d("LiedFragment", "onCreate ")
+//        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         mAdapter = LiedAdapter(mLiedList)
         // Get a new or existing ViewModel from the ViewModelProvider.
         // Lieder einer Landeskirche (Teil)
@@ -72,20 +77,11 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
         liedViewModel = ViewModelProvider(this).get(LiedViewModel::class.java)
         // Update the cached copy of the words in the adapter.
-        GlobalScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(appContext) { lieder ->
-                    Log.v(  "LiedFragment", "onCreate:  mAdapter changed ")
-                    mAdapter.setListEntries(lieder)
-                    // calculate Index List and show it up
-                    mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                    SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                }
-            }
-        }
+        changeLiederSelection(mKirche, sortType, "")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         Log.d("LiedFragment", "onCreateView: savedInstanceState=$savedInstanceState")
 
@@ -105,17 +101,28 @@ class LiedFragment : Fragment(), View.OnClickListener {
         val mLayoutManager: RecyclerView.LayoutManager = LinearLayoutManager(context)
         recyclerView!!.layoutManager = mLayoutManager
         recyclerView!!.itemAnimator = DefaultItemAnimator()
-        recyclerView!!.addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
+        recyclerView!!.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayoutManager.VERTICAL
+            )
+        )
         recyclerView!!.adapter = mAdapter
-        recyclerView!!.addOnItemTouchListener(RecyclerTouchListener(context, recyclerView, object : RecyclerTouchListener.ClickListener {
-            override fun onClick(view: View?, position: Int) {
-                onMyItemClick(position)
-            }
+        recyclerView!!.addOnItemTouchListener(
+            RecyclerTouchListener(
+                context,
+                recyclerView,
+                object : RecyclerTouchListener.ClickListener {
+                    override fun onClick(view: View?, position: Int) {
+                        onMyItemClick(position)
+                    }
 
-            override fun onLongClick(view: View?, position: Int) {}
-        }))
+                    override fun onLongClick(view: View?, position: Int) {}
+                })
+        )
         return rootView
     }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -146,7 +153,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
     }
 
     ////    @Override
-     fun onMyItemClick(position: Int) {
+    fun onMyItemClick(position: Int) {
         Log.d("LiedFragment", "onMyItemClick: position=$position")
         val ixUr = mAdapter!!.mLiedList[position].ixUr
         val idString = mAdapter!!.mLiedList[position].lied
@@ -161,7 +168,8 @@ class LiedFragment : Fragment(), View.OnClickListener {
             arguments.putString(FundstellenLiedFragment.ARG_ITEM_LIED, idString)
             val fragment = FundstellenLiedFragment()
             fragment.arguments = arguments
-            requireFragmentManager().beginTransaction().replace(R.id.activity_detail_container, fragment).commit()
+            requireFragmentManager().beginTransaction()
+                .replace(R.id.activity_detail_container, fragment).commit()
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
@@ -189,7 +197,8 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
             // filtering from actionbar: https://www.androidhive.info/2017/11/android-recyclerview-with-search-filter-functionality/?utm_source=recyclerview&utm_medium=site&utm_campaign=refer_article
             // Associate searchable configuration with the SearchView
-            val searchManager = requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
+            val searchManager =
+                requireActivity().getSystemService(Context.SEARCH_SERVICE) as SearchManager
             val searchView = menu.findItem(R.id.menu_action_search).actionView as SearchView
             searchView.setSearchableInfo(searchManager.getSearchableInfo(requireActivity().componentName))
             searchView.maxWidth = Int.MAX_VALUE
@@ -205,7 +214,12 @@ class LiedFragment : Fragment(), View.OnClickListener {
                     if (mAdapter != null) {
                         mAdapter!!.filter.filter(query) {
                             mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                            SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+                            SideIndex.displayIndex(
+                                mapIndex,
+                                rootView,
+                                layoutInflater,
+                                mOnClickListener
+                            )
                         }
                     }
                     return false
@@ -213,110 +227,69 @@ class LiedFragment : Fragment(), View.OnClickListener {
             })
         }
     }
+
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d("LiedFragment", "onOptionsItemSelected")
-        val mOnClickListener: View.OnClickListener
-        mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
+//        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_kirche -> {
-                // mKircheOld was intended to be marked as previous value during selection
-//                mKircheOld = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
-                //TODO the below doesn't run well, Kirche can be selected, but is passed to filtering too late
-                GlobalScope.launch(Dispatchers.Main){
-                    val mSelectChurch = SelectChurch()
-                    mSelectChurch.selectAndFilterChurch()
-                    liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                        requireActivity()
-                    ) { lieder -> // Update the cached copy of the words in the adapter.
-                        Log.d("LiedFragment", "onCreate: mAdapter changed ")
-                        mAdapter!!.setListEntries(lieder)
-                        // calculate Index List and show it up
-                        mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                        SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
-                    }
+                lifecycleScope.launch {
+//                    mKirche = SelectChurch2().withItems()
+//                    if (mKirche != "") true
+                    DialogController.showDialogAlert()
                 }
                 true
             }
+
             R.id.menu_action_sort_ABC -> {
-                //                Toast.makeText(getActivity(), "sort ABC", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "ABC")
                 sortType = "ABC"
-                GlobalScope.launch(Dispatchers.IO) {
-                    withContext(Dispatchers.Main) {
-                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(requireActivity())
-                        { lieder -> // Update the cached copy of the words in the adapter.
-                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
-                            mAdapter!!.setListEntries(lieder)
-                            // calculate Index List and show it up
-                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                            SideIndex.displayIndex(
-                                mapIndex,
-                                rootView,
-                                layoutInflater,
-                                mOnClickListener
-                            )
-                        }
-                    }
-                    }
+                changeLiederSelection(mKirche, sortType, "")
                 true
             }
+
             R.id.menu_action_sort_Nr -> {
-                //                Toast.makeText(getActivity(), "sort Nr", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "Nr")
                 sortType = "Nr"
-                GlobalScope.launch(Dispatchers.IO) {
-                    withContext(Dispatchers.Main) {
-                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity()
-                        ) { lieder -> // Update the cached copy of the words in the adapter.
-                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
-                            mAdapter!!.setListEntries(lieder)
-                            // calculate Index List and show it up
-                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                            SideIndex.displayIndex(
-                                mapIndex,
-                                rootView,
-                                layoutInflater,
-                                mOnClickListener
-                            )
-                        }
-                    }
-                    }
+                changeLiederSelection(mKirche, sortType, "")
                 true
             }
+
             R.id.menu_action_sort_Anlass -> {
-                //                Toast.makeText(getActivity(), "sort Thema", Toast.LENGTH_SHORT).show();
                 sharedPreference.save(Constant.PREF_SORTTYPE, "Anlass")
                 sortType = "Anlass"
-                GlobalScope.launch(Dispatchers.IO) {
-                    withContext(Dispatchers.Main) {
-                        liedViewModel!!.getAllLieder(mKirche, sortType, "")?.observe(
-                            requireActivity()
-                        ) { lieder -> // Update the cached copy of the words in the adapter.
-                            Log.d("LiedFragment", "onCreate: sortType changed to $sortType")
-                            mAdapter.setListEntries(lieder)
-                            // calculate Index List and show it up
-                            mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
-                            SideIndex.displayIndex(
-                                mapIndex,
-                                rootView,
-                                layoutInflater,
-                                mOnClickListener
-                            )
-                        }
-                    }
-                    }
+                changeLiederSelection(mKirche, sortType, "")
                 true
             }
+
             R.id.menu_action_ueber -> {
-                //                Toast.makeText(getActivity(), "action about", Toast.LENGTH_SHORT).show();
                 val intent = Intent(context, About::class.java)
                 startActivity(intent)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
+     * Lieder lokal aus Datenbank abfragen und anzeigen
+     * für bestimmte Landeskirche, Sortierung und Teilselektion
+     */
+    fun changeLiederSelection(mKirche: String, sortType: String, query: String) {
+        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
+        GlobalScope.launch(Dispatchers.Main){
+            liedViewModel!!.getAllLieder(mKirche, sortType, query)?.observe(
+                requireActivity()
+            ) { lieder -> // Update the cached copy of the words in the adapter.
+                Log.d("LiedFragment", "ChangeLiederSelection: mAdapter changed ")
+                mAdapter.setListEntries(lieder)
+                // calculate Index List and show it up
+                mapIndex = SideIndex.getLiedIndexList(mAdapter, sortType)
+                SideIndex.displayIndex(mapIndex, rootView, layoutInflater, mOnClickListener)
+            }
         }
     }
 

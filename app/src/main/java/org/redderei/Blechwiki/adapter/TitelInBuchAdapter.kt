@@ -1,6 +1,5 @@
 package org.redderei.Blechwiki.adapter
 
-import android.content.*
 import android.util.Log
 import android.view.*
 import android.widget.*
@@ -57,7 +56,7 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
 
 //        Log.v("TitelInBuchViewHolder", "onBindViewHolder");
         when (callingFragment) {
-            TitelInBuchClass.egLiedFundstellen -> {
+            TitelInBuchClass.getEgLiedFundstellen -> {
                 /* Some entries in FundstellenLied may also refer to another Lied as same melody */
                 /* example "Ach bleib bei uns Herr Jesu Christ" same as "Erhalt uns, Herr, bei Deinem Wort" */
                 /* therefore additional entry TitleEGLiedTextView */
@@ -74,7 +73,7 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
                 holder.titleSub2TextView.text = mList[position].komponist
             }
 
-            TitelInBuchClass.buchFundstellen -> {
+            TitelInBuchClass.getBuchFundstellen -> {
                 holder.titleMainTextView.text = mList[position].titel
                 holder.titleSub1TextView.text = mList[position].zus
                 holder.titleSub2TextView.text = mList[position].komponist
@@ -83,14 +82,14 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
                 }
             }
 
-            TitelInBuchClass.komponistFundstellen -> {
+            TitelInBuchClass.getKomponistFundstellen -> {
                 holder.titleMainTextView.text = mList[position].buch
                 holder.titleSub1TextView.text = mList[position].zus
                 holder.titleSub2TextView.text = mList[position].titel
             }
 
-            TitelInBuchClass.titelFundstellen -> {
-                holder.titleMainTextView.text = mList[position].titel
+            TitelInBuchClass.getTitelFundstellen -> {
+                holder.titleMainTextView.text = mList[position].buch
                 holder.titleSub1TextView.text = mList[position].zus
                 holder.titleSub2TextView.text = mList[position].komponist
             }
