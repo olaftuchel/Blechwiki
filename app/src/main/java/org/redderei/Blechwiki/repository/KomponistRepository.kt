@@ -5,11 +5,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.redderei.Blechwiki.gettersetter.KomponistClass
-import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
@@ -33,54 +31,44 @@ class KomponistRepository internal constructor(app: Application) {
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
     suspend fun getAllKomponist(query: String): LiveData<List<KomponistClass>>? {
-
-        Log.d("KomponistRepository", "getAllKomponist: query=>${query}< sharedPreference AutoNrKomponist="
-                    + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST)}, StoreVars.autoNrKomponist=${StoreVars.instance.autoNrKomponist}")
-
         // no data there yet or part of it missing
-        if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST) < StoreVars.instance.autoNrKomponist) {
-            if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_KOMPONIST) == -1) {
-                Log.d("KomponistRepository", "getAllKomponist: fetch initial dataset from REST server")
-            } else {
-                // anything else than changecounter = StoreVars.instance.autoNrKomponist
-                changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_KOMPONIST)
-                Log.d("KomponistRepository", "getAllKomponist: refresh data from REST server, changecounter= ${changecounter}")
-            }
-
-            val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = restBlechwiki.getKomponistList("Komponist", changecounter.toString())
-            call.enqueue(object : Callback<List<KomponistClass>> {
-                override fun onResponse(
-                    call: Call<List<KomponistClass>>,
-                    restResponse: Response<List<KomponistClass>>
-                ) {
-                    Log.d("KomponistRepository", "getAllKomponist: onResponse, we got ${restResponse.body()}")
-                    if (restResponse.isSuccessful) {
-                        Log.d("KomponistRepository", "Response: Komponist size : ${restResponse.body()?.size}")
-                        if (restResponse.body()!!.isNotEmpty()) {
-                            val tableListinsert: List<KomponistClass> = restResponse.body()!!
-                            GlobalScope.launch { modifyAllKomponist(changecounter, tableListinsert)}
-                            sharedPreference.save(Constant.PREF_AUTO_NR_KOMPONIST, StoreVars.instance.autoNrKomponist)
-                            Log.d("KomponistRepository", "getAllKomponist: onResponse, saved Constant.PREF_AUTO_NR_KOMPONIST = StoreVars.instance.autoNrKomponist = ${StoreVars.instance.autoNrKomponist}")
-                        }
+        changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_KOMPONIST)
+        Log.d("KomponistRepository", "getAllKomponist: query=>${query}< sharedPreference KomponistCounter="
+                    + "${changecounter}")
+        val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
+        val call = restBlechwiki.getKomponistList("Komponist", changecounter.toString())
+        call.enqueue(object : Callback<List<KomponistClass>> {
+            override fun onResponse(
+                call: Call<List<KomponistClass>>,
+                restResponse: Response<List<KomponistClass>>
+            ) {
+                Log.d("KomponistRepository", "getAllKomponist: onResponse, we got ${restResponse.body()}")
+                if (restResponse.isSuccessful) {
+                    Log.d("KomponistRepository", "Response: Komponist size : ${restResponse.body()?.size}")
+                    if (restResponse.body()!!.isNotEmpty()) {
+                        val tableListinsert: List<KomponistClass> = restResponse.body()!!
+                        GlobalScope.launch { modifyAllKomponist(changecounter, tableListinsert)}
                     } else {
-                        Log.d("KomponistRepository", "getAllKomponist: onResponse, no success in retrieving data, ${restResponse.message()}")
-                        Toast.makeText(
-                            appContext, "KomponistRepository(getAllKomponist): onResponse, no success in retrieving data, ${restResponse.message()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Log.d("KomponistRepository", "getAllKomponist: onResponse, no new data")
                     }
-                }
-
-                override fun onFailure(call: Call<List<KomponistClass>>, t: Throwable) {
-                    Log.d("KomponistRepository (getAllKomponist): onFailure", "Something went wrong $t")
+                } else {
+                    Log.d("KomponistRepository", "getAllKomponist: onResponse, no success in retrieving data, ${restResponse.message()}")
                     Toast.makeText(
-                        appContext,"KomponistRepository (getAllKomponist): Error $t",
+                        appContext, "KomponistRepository(getAllKomponist): onResponse, no success in retrieving data, ${restResponse.message()}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            })
-        }
+            }
+
+            override fun onFailure(call: Call<List<KomponistClass>>, t: Throwable) {
+                Log.d("KomponistRepository (getAllKomponist): onFailure", "Something went wrong $t")
+                Toast.makeText(
+                    appContext,"KomponistRepository (getAllKomponist): Error $t",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+
         Log.d("KomponistRepository", "KomponistRepository: fetch Komponist from database")
         return mBlechDao.getAllKomponist(query)
     }
@@ -95,7 +83,9 @@ class KomponistRepository internal constructor(app: Application) {
             updateKomponist(komponist.filter{it.change == "update"})
         }
         // maximum value of last changecounter
-        sharedPreference.save(Constant.PREF_CHANGECOUNTER_KOMPONIST, komponist.maxOf{p -> p.changecounter})
+        val newchangecounter = komponist.maxOf{p -> p.changecounter}
+        Log.v("KomponistRepository", "modifyAllKomponist, newchangecounter = ${changecounter}");
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_KOMPONIST, newchangecounter)
     }
 
     suspend fun newKomponist(Komponist: List<KomponistClass>) {

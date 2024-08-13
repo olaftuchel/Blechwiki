@@ -16,9 +16,9 @@ import java.util.*
  */
 // RecyclerView implemented according to https://www.androidhive.info/2016/01/android-working-with-recycler-view/
 // https://www.journaldev.com/12478/android-searchview-example-tutorial using SearchView and Filterable
-class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAdapter.LiedViewHolder>(), Filterable {
+class LiedAdapter(var mList: List<LiedClass>) : RecyclerView.Adapter<LiedAdapter.LiedViewHolder>(), Filterable {
     private var charStringOld: String? = null
-    private lateinit var mLiedListOriginal: List<LiedClass>
+    private lateinit var mListOriginal: List<LiedClass>
     private val sharedPreference: SharedPreference = SharedPreference(MainActivity.appContext)
 
     class LiedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -49,27 +49,27 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
 
     override fun onBindViewHolder(holder: LiedViewHolder, position: Int) {
         // Log.v("LiedAdapter", "onBindViewHolder");
-        holder.titleTextView.text = mLiedList[position].lied
-        //            holder.subtitleTextView.setText(mLiedList.get(position).getTeil());
-        holder.detailTextView.text = mLiedList[position].nr
+        holder.titleTextView.text = mList[position].lied
+        //            holder.subtitleTextView.setText(mList.get(position).getTeil());
+        holder.detailTextView.text = mList[position].nr
         val sortType = sharedPreference.getValueString(Constant.PREF_SORTTYPE).toString()
         if (sortType === "Anlass") {
             holder.anlassTextView.visibility = View.VISIBLE
-            holder.anlassTextView.text = mLiedList[position].anlass
+            holder.anlassTextView.text = mList[position].anlass
         } else {
             holder.anlassTextView.visibility = View.GONE
         }
     }
 
-    fun setListEntries(mList: List<LiedClass>) {
+    fun setListEntries(mListEntries: List<LiedClass>) {
         Log.d("LiedAdapter", "setListEntries")
-        mLiedList = mList
+        mList = mListEntries
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
 //        Log.d("LiedAdapter", "getItemCount");
-        return mLiedList.size
+        return mList.size
     }
 
     override fun getFilter(): Filter {
@@ -78,37 +78,31 @@ class LiedAdapter(var mLiedList: List<LiedClass>) : RecyclerView.Adapter<LiedAda
             override fun performFiltering(charSequence: CharSequence): FilterResults {
                 val charString = charSequence.toString()
                 if (charStringOld == null) {
-                    mLiedList = mLiedList // filtering starts
+                    mListOriginal = mList // filtering starts
                     charStringOld = charString
                 }
                 if (charString.isEmpty()) {
-                    mLiedList = mLiedList // filter cleared
+                    mList = mListOriginal // filter cleared
                     charStringOld = null
                 } else {
                     val filteredList: MutableList<LiedClass> = ArrayList()
-                    for (row in mLiedList) {
-                        // name match condition. this might differ depending on your requirement
-                        // here we are looking for name or phone number match
+                    for (row in mListOriginal) {
                         if (row.lied.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }
-                    mLiedList = filteredList
+                    mList = filteredList
                 }
                 val filterResults = FilterResults()
-                filterResults.values = mLiedList
+                filterResults.values = mList
                 return filterResults
             }
 
             override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
-//                mLiedList = (ArrayList<LiedClass>) filterResults.values;
+//                mList = (ArrayList<LiedClass>) filterResults.values;
                 // refresh the list with filtered data
                 notifyDataSetChanged()
             }
         }
-    }
-
-    init {
-        mLiedList = mLiedList
     }
 }

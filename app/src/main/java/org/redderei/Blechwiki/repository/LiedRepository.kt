@@ -1,19 +1,16 @@
 package org.redderei.Blechwiki.repository
 
 import android.app.Application
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.redderei.Blechwiki.gettersetter.LiedClass
 import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
-import org.redderei.Blechwiki.gettersetter.BuchClass
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 import org.redderei.Blechwiki.util.SharedPreference
@@ -30,44 +27,43 @@ import retrofit2.Response
 
 class LiedRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
+    var changecounter: Int = 0
     val sharedPreference: SharedPreference = SharedPreference(appContext)
 
 
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
     fun getAllLieder(mKirche: String, sortType: String, query: String): LiveData<List<LiedClass>>? {
-
-        Log.d("LiedRepository", "getAllLieder: mKirche=${mKirche} sortType=${sortType} query=${query}" +
-            " sharedPreference AutoNrLied=" + "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_LIED)}, StoreVars.autoNrLied=${StoreVars.instance.autoNrLied}")
-
         // no data there yet or part of it missing
-        if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_LIED) < StoreVars.instance.autoNrLied) {
-            Log.d("LiedRepository", "getAllLieder: refresh data from REST server")
-
-            val destinationService = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = destinationService.getLiedList()
+        changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_LIED)
+        Log.d("LiedRepository", "getAllLieder: query=>${query}<, sharedPreference Liedcounter=" +
+                    "${changecounter}, mKirche=${mKirche}")
+        if (changecounter == 0) {
+            val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
+            val call = restBlechwiki.getLiedList()
             call.enqueue(object : Callback<List<LiedClass>> {
                 override fun onResponse(
                     call: Call<List<LiedClass>>,
                     restResponse: Response<List<LiedClass>>
                 ) {
-                    Log.d("LiedRepository", "getAllLieder: onResponse, we got ${restResponse.body()}")
+                    Log.d(
+                        "LiedRepository",
+                        "getAllLieder: onResponse, we got ${restResponse.body()}"
+                    )
                     if (restResponse.isSuccessful) {
                         Log.d(TAG, "Response: Lieder size : ${restResponse.body()!!.size}")
                         if (restResponse.body()!!.isNotEmpty()) {
                             val tableListinsert: List<LiedClass> = restResponse.body()!!
                             GlobalScope.launch { insertAllLied(tableListinsert) }
-                            sharedPreference.save(
-                                Constant.PREF_AUTO_NR_LIED,
-                                StoreVars.instance.autoNrLied
-                            )
-                            Log.d("LiedRepository", "getAllLied: onResponse, saved Constant.PREF_AUTO_NR_LIED = StoreVars.instance.autoNrLied = ${StoreVars.instance.autoNrLied}")
-
                         }
                     } else {
-                        Log.d("LiedRepository", "getAllLied: onResponse, no success in retrieving data, ${restResponse.message()}")
+                        Log.d(
+                            "LiedRepository",
+                            "getAllLied: onResponse, no success in retrieving data, ${restResponse.message()}"
+                        )
                         Toast.makeText(
-                            appContext, "LiedRepository(getAllLied) onResponse, no success in retrieving data, ${restResponse.message()}",
+                            appContext,
+                            "LiedRepository(getAllLied) onResponse, no success in retrieving data, ${restResponse.message()}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -89,12 +85,15 @@ class LiedRepository internal constructor(app: Application) {
             "ABC" -> {
                 mBlechDao.getAllLiedSortABC(mKirche, query)
             }
+
             "Nr" -> {
                 mBlechDao.getAllLiedSortNr(mKirche, query)
             }
+
             "Anlass" -> {
                 mBlechDao.getAllLiedSortAnlass(mKirche, query)
             }
+
             else -> null
         }
     }
@@ -116,8 +115,7 @@ class LiedRepository internal constructor(app: Application) {
                     Log.d("LiedRepository", "Response: Bücher size : ${restResponse.body()!!.size}")
                     if (restResponse.body()!!.isNotEmpty()) {
                         tableListinsert.value = restResponse.body()!!
-                        Log.d("LiedRepository", "getLiedDetails onResponse: saved Constant.PREF_AUTO_NR_LIED = StoreVars.instance.autoNrLied = ${StoreVars.instance.autoNrLied}")
-
+                        Log.d("LiedRepository", "getLiedDetails onResponse, no new data")
                     }
                 } else {
                     Log.d("LiedRepository", "getLiedDetails onResponse: no success in retrieving data, ${restResponse.message()}")
@@ -141,9 +139,13 @@ class LiedRepository internal constructor(app: Application) {
         mBlechDao.insert(lied);
     }
 
-    suspend fun insertAllLied(liedList: List<LiedClass>) {
-        Log.v("LiedRepository", "insertAllLied " + liedList.size);
-        mBlechDao.insertAllLied(liedList);
+    suspend fun insertAllLied(lied: List<LiedClass>) {
+        Log.v("LiedRepository", "insertAllLied " + lied.size);
+        mBlechDao.insertAllLied(lied);
+        changecounter = 1 // we got no datafield within Rest data
+        sharedPreference.save(
+            Constant.PREF_CHANGECOUNTER_LIED, changecounter)
+        Log.d("LiedRepository","insertAllLied: saved Constant.PREF_CHANGECOUNTER_LIED = ${changecounter}")
     }
 
     init {

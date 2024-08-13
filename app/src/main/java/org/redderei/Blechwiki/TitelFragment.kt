@@ -32,7 +32,7 @@ import java.util.*
  * A simple [Fragment] subclass.
  */
 class TitelFragment : Fragment(), View.OnClickListener {
-    var mTitelList: List<TitelClass> = ArrayList()
+    var mList: List<TitelClass> = ArrayList()
     private lateinit var mAdapter: TitelAdapter
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
@@ -49,7 +49,7 @@ class TitelFragment : Fragment(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         Log.d("TitelFragment", "onCreate: savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
-        mAdapter = TitelAdapter(mTitelList)
+        mAdapter = TitelAdapter(mList)
 
         titelViewModel = ViewModelProvider(this).get(TitelViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
@@ -104,7 +104,7 @@ class TitelFragment : Fragment(), View.OnClickListener {
         Log.d("TitelFragment", "onActivityCreated")
         //
 //        // 4. Access the ListView
-//        mTitelListView = getListView();
+//        mListView = getListView();
 //
 //        // The detail container view will be present only in the
 //        // large-screen layouts (res/values-large and
@@ -130,8 +130,8 @@ class TitelFragment : Fragment(), View.OnClickListener {
 
     fun onMyItemClick(position: Int) {
         Log.d("TitelFragment", "onListItemClick position=$position")
-        val idTitel = mAdapter!!.mTitelList[position].titel
-        val idIx = mAdapter!!.mTitelList[position].ix
+        val idTitel = mAdapter!!.mList[position].titel
+        val idIx = mAdapter!!.mList[position].ix
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a

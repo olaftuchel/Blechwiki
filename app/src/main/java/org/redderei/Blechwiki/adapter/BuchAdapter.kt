@@ -23,9 +23,9 @@ import kotlin.collections.ArrayList
  * shows up titel_in_buch_listl
  * https://www.raywenderlich.com/124438/android-listview-tutorial
  */
-class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAdapter.BuchViewHolder>(), Filterable {
+class BuchAdapter(var mList: List<BuchClass>) : RecyclerView.Adapter<BuchAdapter.BuchViewHolder>(), Filterable {
     private var charStringOld: String? = null
-    private lateinit var mBuchListOriginal: List<BuchClass>     //written at first usage, before filtering starts in getFilter
+    private lateinit var mListOriginal: List<BuchClass>     //written at first usage, before filtering starts in getFilter
 
     class BuchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //        var liedTextView: TextView
@@ -58,25 +58,25 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
 
     override fun onBindViewHolder(holder: BuchViewHolder, position: Int) {
         //Log.v("BuchAdapter", "onBindViewHolder");
-        holder.titleTextView.text = mBuchList[position].buch
-        holder.subtitleTextView.text = mBuchList[position].untertitel
-        if (mBuchList[position].erscheinjahr != "0") {
-            holder.detailTextView.text = mBuchList[position].erscheinjahr
+        holder.titleTextView.text = mList[position].buch
+        holder.subtitleTextView.text = mList[position].untertitel
+        if (mList[position].erscheinjahr != "0") {
+            holder.detailTextView.text = mList[position].erscheinjahr
         } else {
             holder.detailTextView.text = ""
         }
-        Picasso.get().load(Constant.miniImgURL + mBuchList[position].buchkurz + ".jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
+        Picasso.get().load(Constant.miniImgURL + mList[position].buchkurz + ".jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
     }
 
-    fun setListEntries(mList: List<BuchClass>) {
+    fun setListEntries(mListEntries: List<BuchClass>) {
         //Log.d("BuchAdapter", "setListEntries")
-        mBuchList = mList
+        mList = mListEntries
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        //Log.d("BuchAdapter", "getItemCount " + mBuchList.size);
-        return mBuchList.size
+        //Log.d("BuchAdapter", "getItemCount " + mList.size);
+        return mList.size
     }
 
     override fun getFilter(): Filter {
@@ -85,23 +85,23 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
                 var charString = charSequence.toString()
                 charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
-                    mBuchListOriginal = mBuchList // filtering starts
+                    mListOriginal = mList // filtering starts
                     charStringOld = charString
                 }
                 if (charString.isEmpty()) {
-                    mBuchList = mBuchListOriginal // filter cleared
+                    mList = mListOriginal // filter cleared
                     charStringOld = null
                 } else {
                     val filteredList: MutableList<BuchClass> = ArrayList()
-                    for (row in mBuchList) {
+                    for (row in mListOriginal) {
                         if (row.buch.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }
-                    mBuchList = filteredList
+                    mList = filteredList
                 }
                 val filterResults = FilterResults()
-                filterResults.values = mBuchList
+                filterResults.values = mList
                 return filterResults
             }
 
@@ -110,9 +110,5 @@ class BuchAdapter(var mBuchList: List<BuchClass>) : RecyclerView.Adapter<BuchAda
                 notifyDataSetChanged()
             }
         }
-    }
-
-    init {
-        mBuchList = mBuchList
     }
 }

@@ -14,7 +14,9 @@ import java.util.*
  * Created by ot775x on 03.03.2018.
  * https://www.raywenderlich.com/124438/android-listview-tutorial
  */
-class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchClass>): RecyclerView.Adapter<TitelInBuchAdapter.TitelInBuchViewHolder>(), Filterable {
+class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchClass>) :
+    RecyclerView.Adapter<TitelInBuchAdapter.TitelInBuchViewHolder>(), Filterable {
+    private var charStringOld: String? = null
     private lateinit var mListOriginal: List<TitelInBuchClass>
 
     class TitelInBuchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,8 +30,8 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
         var detailTextViewVorzeichen: TextView
         var thumbnailImageView: ImageView
 
-        init {
 
+        init {
 //            Log.v("TitelInBuchViewHolder",  "start");
             titleEGLiedTextView = itemView.findViewById<View>(R.id.titel_eglied) as TextView
             titleMainTextView = itemView.findViewById<View>(R.id.titel_main) as TextView
@@ -44,7 +46,6 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TitelInBuchViewHolder {
-
 //        Log.v("TitelInBuchViewHolder", "onCreateViewHolder");
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_titel_in_buch, parent, false)
@@ -53,7 +54,6 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
     }
 
     override fun onBindViewHolder(holder: TitelInBuchViewHolder, position: Int) {
-
 //        Log.v("TitelInBuchViewHolder", "onBindViewHolder");
         when (callingFragment) {
             TitelInBuchClass.getEgLiedFundstellen -> {
@@ -109,10 +109,9 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
         Picasso.get().load(Constant.miniImgURL + mList[position].quellekurz + ".jpg").placeholder(R.drawable.keinbild).into(holder.thumbnailImageView)
     }
 
-
-    fun setListEntries(mList: List<TitelInBuchClass>) {
+    fun setListEntries(mListEntries: List<TitelInBuchClass>) {
         Log.d("TitelInBuchAdapter", "setListEntries")
-        this.mList = mList
+        this.mList = mListEntries
         notifyDataSetChanged()
     }
 
@@ -125,21 +124,26 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
         Log.d("TitelInBuchAdapter", "getFilter")
         return object : Filter() {
             override fun performFiltering(charSequence: CharSequence): FilterResults {
-                Log.d("TitelInBuchAdapter", "getFilter: $charSequence")
+                Log.d("TitelInBuchAdapter", "getFilter: >$charSequence<")
                 var charString = charSequence.toString()
                 charString = charString.lowercase(Locale.getDefault())
-                mList = if (charString.isEmpty()) {
-                    mList
+                if (charStringOld == null) {
+                    mListOriginal = mList // filtering starts
+                    charStringOld = charString
+                }
+                if (charString.isEmpty()) {
+                    mList = mListOriginal  // filter cleared
+                    charStringOld = null
                 } else {
                     val filteredList: MutableList<TitelInBuchClass> = ArrayList()
-                    for (wp in mList) {
+                    for (wp in mListOriginal) {
                         if (wp.buch.lowercase(Locale.getDefault()).contains(charString)
                             or wp.titel.lowercase(Locale.getDefault()).contains(charString)
                             or wp.komponist.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(wp)
                         }
                     }
-                    filteredList
+                    mList = filteredList
                 }
                 val filterResults = FilterResults()
                 filterResults.values = mList
@@ -150,9 +154,5 @@ class TitelInBuchAdapter(val callingFragment: Int, var mList: List<TitelInBuchCl
                 notifyDataSetChanged()
             }
         }
-    }
-
-    init {
-        mList = mList
     }
 }

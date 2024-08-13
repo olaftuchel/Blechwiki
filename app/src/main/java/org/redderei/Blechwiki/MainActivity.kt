@@ -1,19 +1,12 @@
 package org.redderei.Blechwiki
 
-import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import org.redderei.Blechwiki.gettersetter.Constant
-import org.redderei.Blechwiki.gettersetter.StoreVars
-import org.redderei.Blechwiki.repository.AutoNrViewModel
 import org.redderei.Blechwiki.util.SharedPreference
 
 /**Features
@@ -25,21 +18,13 @@ import org.redderei.Blechwiki.util.SharedPreference
  * Sortierung Lieder (ABC, Nummer, Thema(Abend, Abendmahl, Advent))
  */
 class MainActivity : AppCompatActivity() {
-/*    public val blechViewModel: BlechViewModel by lazy {
-        val factory = MyViewModelFactory(app = Application())
-        Log.d( "Mainactivity", "define MyViewModelFactory as ViewModelProvider)")
-        ViewModelProvider(this, factory).get(BlechViewModel::class.java)
-    }
-*/
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d( "Mainactivity", "onCreate: savedInstanceState= $savedInstanceState")
 
         // store context for later use
         appContext = this
-        val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
-        autoNrViewModel.getAutoNr
-        Log.d("MainActivity", "init: StoreVars, autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
 
         // Set the content of the activity to use the activity_main.xml layout file
         setContentView(R.layout.activity_main)
@@ -57,13 +42,28 @@ class MainActivity : AppCompatActivity() {
         val tabLayout = findViewById<View>(R.id.sliding_tabs) as TabLayout
         tabLayout.setupWithViewPager(viewPager)
 
-        // Greet the user, or ask for their name if new
-//        displayWelcome();
+        val sharedPreference: SharedPreference = SharedPreference(appContext)
+        // init values on first run
+        if (!sharedPreference.getValueBoolean(Constant.PREF_INITIALIZED, false)) {
+            initSharedPreferences(sharedPreference)
+        }
     }
 
-    companion object  {
+    companion object {
         // runs multiple times, but should not
         lateinit var appContext: MainActivity private set
+    }
+
+    fun initSharedPreferences(sharedPreference: SharedPreference) {
+        Log.v("MainActivity", "Init shared preference values as -1")
+        // Values not initialized so far
+        sharedPreference.save(Constant.PREF_SORTTYPE, "ABC")
+        sharedPreference.save(Constant.PREF_KIRCHE, "N")
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_LIED, 0)
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_BUCH, 0)
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_KOMPONIST, 0)
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_TITEL, 0)
+        sharedPreference.save(Constant.PREF_INITIALIZED, true)
     }
 
     //    @Override

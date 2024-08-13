@@ -95,14 +95,14 @@ class BuchFragment : Fragment(), View.OnClickListener {
                         Log.v("BuchFragment", "onCreateView): onLongClick")
                         // Toast.makeText(mActivity, "OnLongClick position=" + position, Toast.LENGTH_SHORT).show();
                         val detailIntent = Intent(activity, BuchDetailActivity::class.java)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mBuchList[position].buch)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mBuchList[position].untertitel)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mBuchList[position].erscheinjahr)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mBuchList[position].herausgeber)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mBuchList[position].herausgvorname)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mBuchList[position].verlag)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mBuchList[position].verlagsnummer)
-                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, Constant.imgURL + mAdapter!!.mBuchList[position].buchkurz + ".jpg")
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_BUCH, mAdapter!!.mList[position].buch)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_UNTERTITEL, mAdapter!!.mList[position].untertitel)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_ERSCHEINJAHR, mAdapter!!.mList[position].erscheinjahr)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBER, mAdapter!!.mList[position].herausgeber)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_HERAUSGEBERVORNAME, mAdapter!!.mList[position].herausgvorname)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAG, mAdapter!!.mList[position].verlag)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_VERLAGSNUMMER, mAdapter!!.mList[position].verlagsnummer)
+                        detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, Constant.imgURL + mAdapter!!.mList[position].buchkurz + ".jpg")
 // without content of imgUrl
 //                detailIntent.putExtra(BuchDetailActivity.ARG_ITEM_IMGURL, "https://de.wikipedia.org/wiki/Buch#/media/Datei:Bibel-1.jpg")
                         startActivity(detailIntent)
@@ -143,8 +143,8 @@ class BuchFragment : Fragment(), View.OnClickListener {
 
     fun onMyItemClick(position: Int) {
         Log.d("BuchFragment", "onListItemClick: position=$position")
-        val idString = mAdapter!!.mBuchList[position].buchId.toString()
-        val longName = mAdapter!!.mBuchList[position].buch
+        val idString = mAdapter!!.mList[position].buchId.toString()
+        val longName = mAdapter!!.mList[position].buch
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a

@@ -17,9 +17,9 @@ import java.util.*
 /**
  * Created by ot775x on 03.03.2018, changed to RestAPI 233.10.2022
  */
-class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.Adapter<KomponistAdapter.KomponistViewHolder>(), Filterable {
+class KomponistAdapter(var mList: List<KomponistClass>) : RecyclerView.Adapter<KomponistAdapter.KomponistViewHolder>(), Filterable {
     private var charStringOld: String? = null
-    private lateinit var mKomponistListOriginal: List<KomponistClass>
+    private lateinit var mListOriginal: List<KomponistClass>
 
     class KomponistViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var titleTextView: TextView
@@ -40,18 +40,18 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: KomponistViewHolder, position: Int) {
-        holder.titleTextView.text = mKomponistList[position].komponist
-//        holder.detailTextView1.text = mKomponistList[position].geboren
-//        holder.detailTextView2.text = mKomponistList[position].gestorben
+        holder.titleTextView.text = mList[position].komponist
+//        holder.detailTextView1.text = mList[position].geboren
+//        holder.detailTextView2.text = mList[position].gestorben
     }
 
-    fun setListEntries(mList: List<KomponistClass>) {
-        mKomponistList = mList
+    fun setListEntries(mListEntries: List<KomponistClass>) {
+        mList = mListEntries
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        return mKomponistList.size
+        return mList.size
     }
 
     override fun getFilter(): Filter {
@@ -61,23 +61,23 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
                 var charString = charSequence.toString()
                 charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
-                    mKomponistList = mKomponistList // filtering starts
+                    mListOriginal = mList // filtering starts
                     charStringOld = charString
                 }
                 if (charString.isEmpty()) {
-                    mKomponistList = mKomponistList // filter cleared
+                    mList = mListOriginal // filter cleared
                     charStringOld = null
                 } else {
                     val filteredList: MutableList<KomponistClass> = ArrayList()
-                    for (row in mKomponistList) {
+                    for (row in mListOriginal) {
                         if (row.komponist.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }
-                    mKomponistList = filteredList
+                    mList = filteredList
                 }
                 val filterResults = FilterResults()
-                filterResults.values = mKomponistList
+                filterResults.values = mList
                 return filterResults
             }
 
@@ -85,9 +85,5 @@ class KomponistAdapter(var mKomponistList: List<KomponistClass>) : RecyclerView.
                 notifyDataSetChanged()
             }
         }
-    }
-
-    init {
-        mKomponistList = mKomponistList
     }
 }

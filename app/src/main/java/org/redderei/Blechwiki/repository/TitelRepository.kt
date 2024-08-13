@@ -5,11 +5,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.*
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.TitelClass
-import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 import org.redderei.Blechwiki.util.SharedPreference
@@ -19,64 +17,50 @@ import retrofit2.Response
 
 class TitelRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
-    val sharedPreference: SharedPreference = SharedPreference(appContext)
     var changecounter: Int = 0
+    val sharedPreference: SharedPreference = SharedPreference(appContext)
+
 
     suspend fun getAllTitel(query: String): LiveData<List<TitelClass>> {
-        Log.d("TitelRepository", "getAllTitel: query=>${query}<, sharedPreference AutoNrTitel=" +
-                    "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_TITEL)}, StoreVars.autoNrTitel=${StoreVars.instance.autoNrTitel}")
-
         // no data there yet or part of it missing
-        if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_TITEL) < StoreVars.instance.autoNrTitel) {
-            if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_TITEL) == -1) {
-                Log.d("TitelRepository", "getAllTitel: fetch initial dataset from REST server")
-            } else {
-                // anything else than changecounter = StoreVars.instance.autoNrTitel
-                changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_TITEL)
-                Log.d("TitelRepository", "getAllTitel: refresh data from REST server, changecounter= ${changecounter}")
-            }
+        changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_TITEL)
+        Log.d("TitelRepository", "getAllTitel: query=>${query}<, sharedPreference TitelCounter=" +
+                    "${changecounter}")
 
-            val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = restBlechwiki.getTitelList("Titel", changecounter.toString())
-            call.enqueue(object : Callback<List<TitelClass>> {
-                override fun onResponse(
-                    call: Call<List<TitelClass>>,
-                    restResponse: Response<List<TitelClass>>
-                ) {
-                    Log.d("TitelRepository", "getAllTitel onResponse: we got ${restResponse.body()}")
-                    if (restResponse.isSuccessful) {
-                        Log.d("TitelRepository", "Response: Titel size : ${restResponse.body()?.size}")
-                        if (restResponse.body()!!.isNotEmpty()) {
-                            val tableListinsert: List<TitelClass> = restResponse.body()!!
-                            GlobalScope.launch { modifyAllTitel(changecounter, tableListinsert) }
-                            sharedPreference.save(
-                                Constant.PREF_AUTO_NR_TITEL,
-                                StoreVars.instance.autoNrTitel
-                            )
-                            Log.d(
-                                "TitelRepository",
-                                "getAllTitel onResponse: saved Constand.PREF_AUTO_NR_TITEL = StoreVars.instance.autoNrTitel = ${StoreVars.instance.autoNrTitel}"
-                            )
-                        }
+        val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
+        val call = restBlechwiki.getTitelList("Titel", changecounter.toString())
+        call.enqueue(object : Callback<List<TitelClass>> {
+            override fun onResponse(
+                call: Call<List<TitelClass>>,
+                restResponse: Response<List<TitelClass>>
+            ) {
+                Log.d("TitelRepository", "getAllTitel onResponse: we got ${restResponse.body()}")
+                if (restResponse.isSuccessful) {
+                    Log.d("TitelRepository", "Response: Titel size : ${restResponse.body()?.size}")
+                    if (restResponse.body()!!.isNotEmpty()) {
+                        val tableListinsert: List<TitelClass> = restResponse.body()!!
+                        GlobalScope.launch { modifyAllTitel(changecounter, tableListinsert) }
                     } else {
-                        Log.d("TitelRepository", "getAllTitel onResponse: no success in retrieving data, ${restResponse.message()}")
-                        Toast.makeText(
-                            appContext,"TitelRepository(getAllTitel) onResponse: no success in retrieving data, ${restResponse.message()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Log.d("TitelRepository", "getAllTitel onResponse: no new data")
                     }
-                }
-
-                override fun onFailure(call: Call<List<TitelClass>>, t: Throwable) {
-                    Log.d("TitelRepository",  "getAllTitel onFailure: Something went wrong $t")
+                } else {
+                    Log.d("TitelRepository", "getAllTitel onResponse: no success in retrieving data, ${restResponse.message()}")
                     Toast.makeText(
-                        appContext, "TitelRepository(getAllTitel): Error $t",
+                        appContext,"TitelRepository(getAllTitel) onResponse: no success in retrieving data, ${restResponse.message()}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            })
-        }
-        Log.d( "TitelRepository", "try to fetch Titel from database")
+            }
+
+            override fun onFailure(call: Call<List<TitelClass>>, t: Throwable) {
+                Log.d("TitelRepository",  "getAllTitel onFailure: Something went wrong $t")
+                Toast.makeText(
+                    appContext, "TitelRepository(getAllTitel): Error $t",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+        Log.d( "TitelRepository", "fetch Titel from database")
         return mBlechDao.getAllTitel(query)
     }
 
@@ -90,7 +74,9 @@ class TitelRepository internal constructor(app: Application) {
             updateTitel(titel.filter{it.change == "update"})
         }
         // maximum value of last changecounter
-        sharedPreference.save(Constant.PREF_CHANGECOUNTER_TITEL, titel.maxOf{p -> p.changecounter})
+        val newchangecounter = titel.maxOf{p -> p.changecounter}
+        Log.v("BuchRepository", "modifyAllBuch, newchangecounter = ${newchangecounter}");
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_TITEL, newchangecounter)
     }
 
     suspend fun newTitel(Titel: List<TitelClass>) {
@@ -153,12 +139,5 @@ class TitelRepository internal constructor(app: Application) {
         Log.d("TitelRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-/*
-        // initialize store for global variables
-        if (StoreVars.instance.autoNrTitel == 0) {
-            val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
-            autoNrViewModel.getAutoNr
-            Log.d("TitelRepository", "init: autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
-        }
-*/    }
+    }
 }

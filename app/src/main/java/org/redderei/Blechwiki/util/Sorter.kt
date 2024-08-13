@@ -22,7 +22,7 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
     companion object {
         fun sortKomponist(adapter: KomponistAdapter, order: Int) {
             Log.v(ContentValues.TAG, "Sorter.sortKomponist")
-            Collections.sort(adapter.mKomponistList, object : Sorter(order) {
+            Collections.sort(adapter.mList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
                     val komponist1 = (ob1 as KomponistClass).komponist
@@ -36,7 +36,7 @@ open class Sorter internal constructor(order: Int) : Comparator<Any> {
         // not in use
         fun sortTitel(adapter: TitelAdapter, order: Int) {
             Log.v(ContentValues.TAG, "Sorter.sortTitel")
-            Collections.sort(adapter.mTitelList, object : Sorter(order) {
+            Collections.sort(adapter.mList, object : Sorter(order) {
                 var germanCollator = Collator.getInstance(Locale.GERMANY)
                 override fun compare(ob1: Any, ob2: Any): Int {
                     val titel1 = (ob1 as TitelClass).titel

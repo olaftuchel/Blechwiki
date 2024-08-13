@@ -9,10 +9,6 @@ import retrofit2.http.Query
 
 interface RestInterface {
     // Use the @GET annotation to tell Retrofit that this is GET request, and specify an endpoint, for that web service method
-    @GET("Version")
-    fun getAutoNr () : Call<AutoNrClass>
-
-
     @GET("EG")
     fun getLiedList () : Call<List<LiedClass>>
 

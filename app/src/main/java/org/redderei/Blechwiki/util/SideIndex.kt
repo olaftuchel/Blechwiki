@@ -23,18 +23,18 @@ object SideIndex {
 //        Log.v("SideIndex", "getLiedIndexList: sortType=" + sortType);
         val mapIndex: MutableMap<String, Int> = LinkedHashMap<String, Int>()
         var i: Int = 0
-        if (mAdapter!!.mLiedList.isNotEmpty()) {
+        if (mAdapter!!.mList.isNotEmpty()) {
             when (sortType) {
                 "ABC" -> {
-                    while (i < mAdapter.mLiedList.size) {
-                        val indexChar = mAdapter.mLiedList[i].lied.substring(0, 1).uppercase()
+                    while (i < mAdapter.mList.size) {
+                        val indexChar = mAdapter.mList[i].lied.substring(0, 1).uppercase()
                         if (indexChar.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
                         i++
                     }
                 }
                 "Nr" -> {
-                    while (i < mAdapter.mLiedList.size) {
-                        indexChar = mAdapter.mLiedList[i].nr
+                    while (i < mAdapter.mList.size) {
+                        indexChar = mAdapter.mList[i].nr
                         val ind = indexChar!!.toInt()
                         if (ind % 30 == 0) { mapIndex[indexChar!!] = i
                         }
@@ -42,8 +42,8 @@ object SideIndex {
                     }
                 }
                 "Anlass" -> {
-                    while (i < mAdapter.mLiedList.size) {
-                        val indexChar = mAdapter.mLiedList[i].anlass.substring(0, 1).uppercase()
+                    while (i < mAdapter.mList.size) {
+                        val indexChar = mAdapter.mList[i].anlass.substring(0, 1).uppercase()
                         if (indexChar.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
                         i++
                     }
@@ -61,9 +61,9 @@ object SideIndex {
     fun getBuchIndexList(mAdapter: BuchAdapter): Map<String, Int> {
         // calculate Index List and show it up
         val mapIndex: MutableMap<String, Int> = LinkedHashMap<String, Int>()
-        if (mAdapter.mBuchList.isNotEmpty()) {
-            for (i: Int in mAdapter.mBuchList.indices) {
-                indexChar = mAdapter.mBuchList[i].buch.substring(0, 1).uppercase()
+        if (mAdapter.mList.isNotEmpty()) {
+            for (i: Int in mAdapter.mList.indices) {
+                indexChar = mAdapter.mList[i].buch.substring(0, 1).uppercase()
                 if (indexChar!!.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
             }
         }
@@ -73,9 +73,9 @@ object SideIndex {
 
     fun getKomponistIndexList(mAdapter: KomponistAdapter): Map<String, Int> {
         val mapIndex: MutableMap<String, Int> = LinkedHashMap<String, Int>()
-        if (mAdapter.mKomponistList.isNotEmpty()) {
-            for (i: Int in mAdapter.mKomponistList.indices) {
-                indexChar = mAdapter.mKomponistList[i].komponist.substring(0, 1).uppercase()
+        if (mAdapter.mList.isNotEmpty()) {
+            for (i: Int in mAdapter.mList.indices) {
+                indexChar = mAdapter.mList[i].komponist.substring(0, 1).uppercase()
                 if (indexChar!!.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
             }
         }
@@ -85,9 +85,9 @@ object SideIndex {
 
     fun getTitelIndexList(mAdapter: TitelAdapter): Map<String, Int> {
         val mapIndex: MutableMap<String, Int> = LinkedHashMap<String, Int>()
-        if (mAdapter.mTitelList.isNotEmpty()) {
-            for (i: Int in mAdapter.mTitelList.indices) {
-                indexChar = mAdapter.mTitelList[i].titel.substring(0, 1).uppercase()
+        if (mAdapter.mList.isNotEmpty()) {
+            for (i: Int in mAdapter.mList.indices) {
+                indexChar = mAdapter.mList[i].titel.substring(0, 1).uppercase()
                 if (indexChar!!.matches(Regex("[A-Z]")) && mapIndex[indexChar] == null) mapIndex[indexChar!!] = i
             }
         }

@@ -19,55 +19,51 @@ import retrofit2.Response
 
 class BuchRepository internal constructor(app: Application) {
     private val mBlechDao: BlechDao
-    val sharedPreference: SharedPreference = SharedPreference(appContext)
     var changecounter: Int = 0
+    val sharedPreference: SharedPreference = SharedPreference(appContext)
+
 
     suspend fun getAllBuch(query: String): LiveData<List<BuchClass>>? {
-        Log.d("BuchRepository", "getAllBuch: query=>${query}<, sharedPreference AutoNrBuch=" +
-                "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}, StoreVars.autoNrBuch=${StoreVars.instance.autoNrBuch}")
-        if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) < StoreVars.instance.autoNrBuch) {
-            // no data there yet or part of it changed
-            if (sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH) == -1) {
-                Log.d("BuchRepository", "getAllBuch: fetch initial dataset from REST server")
-            } else {
-                // anything else than changecounter = StoreVars.instance.autoNrBuch
-                changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_BUCH)
-                Log.d("BuchRepository", "getAllBuch: refresh data from REST server, changecounter= ${changecounter}")
-            }
+        // no data there yet or part of it missing
+        changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_BUCH)
+        Log.d("BuchRepository", "getAllBuch: query=>${query}<, sharedPreference BuchCounter=" +
+                "${changecounter}")
 
-            val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
-            val call = restBlechwiki.getBuchList("Buch", changecounter.toString())
-            call.enqueue(object : Callback<List<BuchClass>> {
-                override fun onResponse(
-                    call: Call<List<BuchClass>>,
-                    restResponse: Response<List<BuchClass>>
-                ) {
-                    Log.d("BuchRepository", "getAllBuch: onResponse, we got ${restResponse.body()}")
-                    if (restResponse.isSuccessful) {
-                        Log.d("BuchRepository", "getAllBuch: Buch size : ${restResponse.body()?.size}")
-                        if (restResponse.body()!!.isNotEmpty()) {
-                            val tableListinsert: List<BuchClass> = restResponse.body()!!
-                            GlobalScope.launch { modifyAllBuch(changecounter, tableListinsert) }
-                        }
+        val restBlechwiki = ServiceBuilder.buildService(RestInterface::class.java)
+        val call = restBlechwiki.getBuchList("Buch", changecounter.toString())
+        call.enqueue(object : Callback<List<BuchClass>> {
+            override fun onResponse(
+                call: Call<List<BuchClass>>,
+                restResponse: Response<List<BuchClass>>
+            ) {
+                Log.d("BuchRepository", "getAllBuch: onResponse, we got ${restResponse.body()}")
+                if (restResponse.isSuccessful) {
+                    Log.d("BuchRepository", "getAllBuch: Buch size : ${restResponse.body()?.size}")
+                    if (restResponse.body()!!.isNotEmpty()) {
+                        val tableListinsert: List<BuchClass> = restResponse.body()!!
+                        GlobalScope.launch { modifyAllBuch(changecounter, tableListinsert) }
                     } else {
-                        Log.d("BuchRepository", "getAllBuch: onResponse, no success in retrieving data, ${restResponse.message()}")
-                        Toast.makeText(
-                            appContext, "BuchRepository(getAllBuch) onResponse, no success in retrieving data, ${restResponse.message()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Log.d("BuchRepository", "getAllBuch: onResponse, no new data")
                     }
-                }
-
-                override fun onFailure(call: Call<List<BuchClass>>, t: Throwable) {
-                    Log.d("BuchRepository", "getAllBuch: onFailure, Something went wrong $t")
+                } else {
+                    Log.d("BuchRepository", "getAllBuch: onResponse, no success in retrieving data, ${restResponse.message()}")
                     Toast.makeText(
-                        appContext,
-                        "getAllBuch): Error $t",
+                        appContext, "BuchRepository(getAllBuch) onResponse, no success in retrieving data, ${restResponse.message()}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            })
-        }
+            }
+
+            override fun onFailure(call: Call<List<BuchClass>>, t: Throwable) {
+                Log.d("BuchRepository", "getAllBuch: onFailure, Something went wrong $t")
+                Toast.makeText(
+                    appContext,
+                    "getAllBuch): Error $t",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+
         Log.d("BuchRepository", "fetch Buch from database")
         return mBlechDao.getAllBuch(query)
     }
@@ -82,10 +78,9 @@ class BuchRepository internal constructor(app: Application) {
             updateBuch(buch.filter{it.change == "update"})
         }
         // maximum value of last changecounter
-        sharedPreference.save(Constant.PREF_CHANGECOUNTER_BUCH, buch.maxOf{p -> p.changecounter})
-        sharedPreference.save(Constant.PREF_AUTO_NR_BUCH, StoreVars.instance.autoNrBuch)
-        Log.d("BuchRepository", "modifyAllBuch: saved Constant.PREF_AUTO_NR_BUCH = " +
-                "${sharedPreference.getValueInt(Constant.PREF_AUTO_NR_BUCH)}")
+        val newchangecounter = buch.maxOf{p -> p.changecounter}
+        Log.v("BuchRepository", "modifyAllBuch, newchangecounter = ${newchangecounter}");
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_BUCH, newchangecounter)
     }
 
     suspend fun newBuch(buch: List<BuchClass>) {
@@ -156,4 +151,3 @@ class BuchRepository internal constructor(app: Application) {
         }
 */    }
 }
-

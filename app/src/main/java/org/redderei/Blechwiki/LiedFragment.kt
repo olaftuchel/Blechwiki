@@ -10,11 +10,10 @@ import android.util.Log
 import android.view.*
 import android.widget.ListView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +37,8 @@ import org.redderei.Blechwiki.util.*
  * A simple [Fragment] subclass.
  */
 class LiedFragment : Fragment(), View.OnClickListener {
-    private var mLiedList: List<LiedClass> = ArrayList()
+    //, NoticeDialogFragment.NoticeDialogListener {
+    private var mList: List<LiedClass> = ArrayList()
     private lateinit var mAdapter: LiedAdapter
     private var mapIndex: Map<String, Int>? = null
     private var mKirche = ""
@@ -52,10 +52,9 @@ class LiedFragment : Fragment(), View.OnClickListener {
     // https://developer.android.com/kotlin/coroutines/coroutines-adv?hl=de
     val scope = CoroutineScope(Job() + Dispatchers.Main)
 
-
     // The current activated item position. Only used on tablets
     private var mActivatedPosition = ListView.INVALID_POSITION
-
+    val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
 
     companion object {
         /**
@@ -68,8 +67,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("LiedFragment", "onCreate ")
-//        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
-        mAdapter = LiedAdapter(mLiedList)
+        mAdapter = LiedAdapter(mList)
         // Get a new or existing ViewModel from the ViewModelProvider.
         // Lieder einer Landeskirche (Teil)
         mKirche = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
@@ -144,6 +142,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
 
     //click on side index to scroll to specific item
     override fun onClick(view: View) {
+
         Log.v("LiedFragment", "onClick")
         val selectedIndex = view as TextView
 
@@ -155,8 +154,8 @@ class LiedFragment : Fragment(), View.OnClickListener {
     ////    @Override
     fun onMyItemClick(position: Int) {
         Log.d("LiedFragment", "onMyItemClick: position=$position")
-        val ixUr = mAdapter!!.mLiedList[position].ixUr
-        val idString = mAdapter!!.mLiedList[position].lied
+        val ixUr = mAdapter!!.mList[position].ixUr
+        val idString = mAdapter!!.mList[position].lied
 
         // https://inducesmile.com/android/android-fragment-masterdetail-flow-tutorial-in-android-studio/
         if (mDualPane) {
@@ -168,6 +167,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
             arguments.putString(FundstellenLiedFragment.ARG_ITEM_LIED, idString)
             val fragment = FundstellenLiedFragment()
             fragment.arguments = arguments
+            // use childFragmentManager instead
             requireFragmentManager().beginTransaction()
                 .replace(R.id.activity_detail_container, fragment).commit()
         } else {
@@ -185,7 +185,6 @@ class LiedFragment : Fragment(), View.OnClickListener {
     // Options menu continuing http://droidmentor.com/how-to-use-fragment-specific-menu-in-android/
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        //if (menu.size() == 0)
         run {
             Log.d("LiedFragment", "onCreateOptionsMenu")
             val mOnClickListener = View.OnClickListener { view: View -> this.onClick(view) }
@@ -231,14 +230,20 @@ class LiedFragment : Fragment(), View.OnClickListener {
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d("LiedFragment", "onOptionsItemSelected")
-//        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         return when (item.itemId) {
             R.id.menu_action_search -> true
             R.id.menu_action_kirche -> {
-                lifecycleScope.launch {
-//                    mKirche = SelectChurch2().withItems()
-//                    if (mKirche != "") true
-                    DialogController.showDialogAlert()
+                val builder = AlertDialog.Builder(MainActivity.appContext)
+
+                with(builder)
+                {
+                    setTitle("Bitte Gesangbuch auswählen")
+                    setItems(Constant.mBuchLang) { dialog, which ->
+                        sharedPreference.save(Constant.PREF_KIRCHE, Constant.mBuchKurz[which])
+                        changeLiederSelection(Constant.mBuchKurz[which], sortType, "")
+                    }
+                    create()
+                    show()
                 }
                 true
             }
@@ -279,7 +284,7 @@ class LiedFragment : Fragment(), View.OnClickListener {
      * für bestimmte Landeskirche, Sortierung und Teilselektion
      */
     fun changeLiederSelection(mKirche: String, sortType: String, query: String) {
-        val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
+        //val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         GlobalScope.launch(Dispatchers.Main){
             liedViewModel!!.getAllLieder(mKirche, sortType, query)?.observe(
                 requireActivity()
@@ -292,6 +297,18 @@ class LiedFragment : Fragment(), View.OnClickListener {
             }
         }
     }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following
+    // methods defined by the NoticeDialogFragment.NoticeDialogListener
+    // interface.
+    /*
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        // User taps the dialog's positive button.
+        val sharedPreference = SharedPreference(appContext)
+        val mKirche = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
+        Log.d("LiedFragment", "onDialogPositiveClick: mKirche= ${mKirche}")
+    }*/
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

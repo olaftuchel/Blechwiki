@@ -17,9 +17,9 @@ import java.util.*
 
 
 
-class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<TitelAdapter.TitelViewHolder>(), Filterable {
+class TitelAdapter(var mList: List<TitelClass>) : RecyclerView.Adapter<TitelAdapter.TitelViewHolder>(), Filterable {
     private var charStringOld: String? = null
-    private lateinit var mTitelListOriginal: List<TitelClass>
+    private lateinit var mListOriginal: List<TitelClass>
 
     class TitelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var titleTextView: TextView
@@ -40,16 +40,16 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
     }
 
     override fun onBindViewHolder(holder: TitelViewHolder, position: Int) {
-        holder.titleTextView.text = mTitelList[position].titel
+        holder.titleTextView.text = mList[position].titel
     }
 
-    fun setListEntries(mList: List<TitelClass>) {
-        mTitelList = mList
+    fun setListEntries(mListEntries: List<TitelClass>) {
+        mList = mListEntries
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        return mTitelList.size
+        return mList.size
     }
 
     override fun getFilter(): Filter {
@@ -59,23 +59,23 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
                 var charString = charSequence.toString()
                 charString = charString.lowercase(Locale.getDefault())
                 if (charStringOld == null) {
-                    mTitelList = mTitelList // filtering starts
+                    mListOriginal = mList // filtering starts
                     charStringOld = charString
                 }
                 if (charString.isEmpty()) {
-                    mTitelList = mTitelList // filter cleared
+                    mList = mListOriginal // filter cleared
                     charStringOld = null
                 } else {
                     val filteredList: MutableList<TitelClass> = ArrayList()
-                    for (row in mTitelList) {
+                    for (row in mListOriginal) {
                         if (row.titel.lowercase(Locale.getDefault()).contains(charString)) {
                             filteredList.add(row)
                         }
                     }
-                    mTitelList = filteredList
+                    mList = filteredList
                 }
                 val filterResults = FilterResults()
-                filterResults.values = mTitelList
+                filterResults.values = mList
                 return filterResults
             }
 
@@ -83,9 +83,5 @@ class TitelAdapter(var mTitelList: List<TitelClass>) : RecyclerView.Adapter<Tite
                 notifyDataSetChanged()
             }
         }
-    }
-
-    init {
-        mTitelList = mTitelList
     }
 }

@@ -32,7 +32,7 @@ import org.redderei.Blechwiki.util.SideIndex
  * A simple [Fragment] subclass.
  */
 class KomponistFragment : Fragment(), View.OnClickListener {
-    private var mKomponistList: List<KomponistClass> = ArrayList()
+    private var mList: List<KomponistClass> = ArrayList()
     private lateinit var mAdapter: KomponistAdapter
     private var mapIndex: Map<String, Int>? = null
     private var recyclerView: RecyclerView? = null
@@ -45,13 +45,13 @@ class KomponistFragment : Fragment(), View.OnClickListener {
         private const val STATE_ACTIVATED_POSITION = "activated_position"
     }
 
-//    fun onUpdate(mKomponistList: List<*>?) {}
+//    fun onUpdate(mList: List<*>?) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("KomponistFragment", "onCreate: savedInstanceState=$savedInstanceState")
         val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
-        mAdapter = KomponistAdapter(mKomponistList)
+        mAdapter = KomponistAdapter(mList)
 
         komponistViewModel = ViewModelProvider(this).get(KomponistViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
@@ -103,7 +103,7 @@ class KomponistFragment : Fragment(), View.OnClickListener {
         Log.d("KomponistFragment", "onActivityCreated, savedInstanceState=$savedInstanceState")
 
 //        // 4. Access the ListView
-//        mKomponistListView = getListView();
+//        mListView = getListView();
 //
 //        // The detail container view will be present only in the
 //        // large-screen layouts (res/values-large and
@@ -129,8 +129,8 @@ class KomponistFragment : Fragment(), View.OnClickListener {
 
     fun onMyItemClick(position: Int) {
         Log.d("KomponistFragment", "onListItemClick: position=$position")
-        val shortName = mAdapter!!.mKomponistList[position].id.toString()
-        val longName = mAdapter!!.mKomponistList[position].komponist
+        val shortName = mAdapter!!.mList[position].id.toString()
+        val longName = mAdapter!!.mList[position].komponist
         if (mDualPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
