@@ -53,7 +53,7 @@ interface BlechDao {
     fun getAllBuch(query: String?): LiveData<List<BuchClass>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertBuch(buch: List<BuchClass>)
+    fun insertBuch(buch: List<BuchClass>)
 
     @Delete()
     suspend fun deleteBuch(buch: List<BuchClass>)
