@@ -3,7 +3,6 @@ package org.redderei.Blechwiki.repository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import org.redderei.Blechwiki.gettersetter.Constant
-//import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object ServiceBuilder {
 

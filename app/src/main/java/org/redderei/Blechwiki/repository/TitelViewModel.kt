@@ -39,12 +39,6 @@ class TitelViewModel(app: Application) : AndroidViewModel(app) {
         return mRepository.getTitelDetails(titelNr);
     }
 
-/*
-    suspend fun getAllTitelKomma(query: String): LiveData<List<TitelClass>>? {
-        Log.d("TitelViewModel", "getAllTitelKomma")
-        return mRepository.getAllTitelKomma(query)
-    }
-*/
     init {
         Log.d("TitelViewModel", "init")
         mRepository = TitelRepository(app)

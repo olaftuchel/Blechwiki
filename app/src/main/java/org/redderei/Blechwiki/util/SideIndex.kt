@@ -1,7 +1,6 @@
 
 package org.redderei.Blechwiki.util
 
-import android.content.ContentValues
 import android.util.Log
 import android.view.*
 import android.widget.LinearLayout

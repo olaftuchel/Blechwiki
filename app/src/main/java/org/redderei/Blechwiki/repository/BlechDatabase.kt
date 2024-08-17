@@ -17,18 +17,19 @@ abstract class BlechDatabase : RoomDatabase() {
         private var INSTANCE: BlechDatabase? = null
         private const val NUMBER_OF_THREADS = 4
         val databaseWriteExecutor = Executors.newFixedThreadPool(BlechDatabase.Companion.NUMBER_OF_THREADS)
+
         fun getDatabase(context: Context): BlechDatabase? {
             if (BlechDatabase.INSTANCE == null) {
                 synchronized(BlechDatabase::class.java) {
                     if (BlechDatabase.INSTANCE == null) {
                         BlechDatabase.INSTANCE = Room.databaseBuilder(context.applicationContext,
-                                BlechDatabase::class.java, Constant.DB_NAME)
-                                .fallbackToDestructiveMigration()
-                                .addCallback(BlechDatabase.Companion.sRoomDatabaseCallback)
-                                // Wipes and rebuilds instead of migrating
-                                // if no Migration object.
-                                // Migration is not part of this practical.
-                                .build()
+                            BlechDatabase::class.java, Constant.DB_NAME)
+                            .fallbackToDestructiveMigration()
+                            .addCallback(BlechDatabase.Companion.sRoomDatabaseCallback)
+                            // Wipes and rebuilds instead of migrating
+                            // if no Migration object.
+                            // Migration is not part of this practical.
+                            .build()
                     }
                 }
             }

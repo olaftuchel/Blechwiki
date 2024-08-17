@@ -9,7 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.redderei.Blechwiki.gettersetter.LiedClass
-import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass

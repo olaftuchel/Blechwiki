@@ -31,14 +31,12 @@ class BuchViewModel(app: Application) : AndroidViewModel(app) {
     private val mRepository: BuchRepository
 
     suspend fun getAllBuecher(query: String): LiveData<List<BuchClass>>? {
-        Log.d(ContentValues.TAG, "BuchViewModel (getAllBuecher)")
-//        GlobalScope.launch{ mRepository.getAllBuecher(query)}
-//        return withContext(Dispatchers.IO) {mRepository.getAllBuecher(query)}
+        Log.d("BuchViewModel", "BuchViewModel (getAllBuecher)")
         return mRepository.getAllBuch(query)
     }
 
     suspend fun getBuchDetails(buchNr: Int): MutableLiveData<List<TitelInBuchClass>> {
-        Log.v(TAG, "BuchViewModel (getBuchDetails) " + buchNr);
+        Log.v("BuchViewModel", "BuchViewModel (getBuchDetails) " + buchNr);
         return mRepository.getBuchDetails(buchNr);
     }
 

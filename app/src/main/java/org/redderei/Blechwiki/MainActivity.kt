@@ -55,24 +55,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initSharedPreferences(sharedPreference: SharedPreference) {
-        Log.v("MainActivity", "Init shared preference values as -1")
+        Log.v("MainActivity", "Init shared preference values as 0")
         // Values not initialized so far
+        // changecounter = 0: pull the whole set of data
+        // changecounter > 0: pull the update from changecounter to last package set
         sharedPreference.save(Constant.PREF_SORTTYPE, "ABC")
         sharedPreference.save(Constant.PREF_KIRCHE, "N")
-        sharedPreference.save(Constant.PREF_CHANGECOUNTER_LIED, 0)
+        sharedPreference.save(Constant.PREF_CHANGECOUNTER_LIED, 0)  // we do not expect changes
         sharedPreference.save(Constant.PREF_CHANGECOUNTER_BUCH, 0)
         sharedPreference.save(Constant.PREF_CHANGECOUNTER_KOMPONIST, 0)
         sharedPreference.save(Constant.PREF_CHANGECOUNTER_TITEL, 0)
         sharedPreference.save(Constant.PREF_INITIALIZED, true)
     }
 
-    //    @Override
-    //    protected void onSaveInstanceState(Bundle outState) {
-    //        super.onSaveInstanceState(outState);
-    //        Log.d(TAG, "Mainactivity (onSaveInstanceState)");
-    //        outState.putInt("someVarA", someVarA);
-    //        outState.putString("someVarB", someVarB);
-    //    }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 //        super.onRestoreInstanceState(savedInstanceState);
         Log.d( "Mainactivity", "onRestoreInstanceState")

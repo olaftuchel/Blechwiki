@@ -147,12 +147,5 @@ class KomponistRepository internal constructor(app: Application) {
         Log.d("KomponistRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-/*
-        // initialize store for global variables
-        if (StoreVars.instance.autoNrKomponist == 0) {
-            val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
-            autoNrViewModel.getAutoNr
-            Log.d("KomponistRepository", "init: autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
-        }
-*/    }
+    }
 }

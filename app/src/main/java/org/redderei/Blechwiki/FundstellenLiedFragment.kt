@@ -101,21 +101,7 @@ class FundstellenLiedFragment : Fragment(), View.OnClickListener {
         }))
         return rootView
     }
-/*
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        activity?.lifecycle?.addObserver(ActivityLifeCycleObserver {
-        // code your stuff here
-        Log.d("FundstellenLiedFragment","FundstellenLiedFragment: onAttach")
-        })
-    }
-*/
- /*
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d("FundstellenLiedFragment","FundstellenLiedFragment: onActivityCreated")
-    }
-*/
+
     override fun onClick(view: View) {
         Log.v("FundstellenLiedFragment","FundstellenLiedFragment (onClick)")
         val selectedIndex = view as TextView

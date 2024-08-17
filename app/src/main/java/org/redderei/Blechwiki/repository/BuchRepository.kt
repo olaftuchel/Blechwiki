@@ -5,11 +5,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.*
 import org.redderei.Blechwiki.gettersetter.Constant
 import org.redderei.Blechwiki.gettersetter.BuchClass
-import org.redderei.Blechwiki.gettersetter.StoreVars
 import org.redderei.Blechwiki.MainActivity.Companion.appContext
 import org.redderei.Blechwiki.gettersetter.TitelInBuchClass
 import org.redderei.Blechwiki.util.SharedPreference
@@ -24,7 +22,7 @@ class BuchRepository internal constructor(app: Application) {
 
 
     suspend fun getAllBuch(query: String): LiveData<List<BuchClass>>? {
-        // no data there yet or part of it missing
+        // get the data (everything = 0 or just changes > 0)
         changecounter = sharedPreference.getValueInt(Constant.PREF_CHANGECOUNTER_BUCH)
         Log.d("BuchRepository", "getAllBuch: query=>${query}<, sharedPreference BuchCounter=" +
                 "${changecounter}")
@@ -142,12 +140,5 @@ class BuchRepository internal constructor(app: Application) {
         Log.d("BuchRepository", "init")
         val db: BlechDatabase? = BlechDatabase.getDatabase(app)
         mBlechDao = db?.BlechDao()!!
-/*
-        // initialize store for global variables
-        if (StoreVars.instance.autoNrBuch == 0) {
-            val autoNrViewModel = ViewModelProvider(appContext).get(AutoNrViewModel::class.java)
-            autoNrViewModel.getAutoNr
-            Log.d("BuchRepository", "init: StoreVars, autoNrBuch=${StoreVars.instance.autoNrBuch} autoNrKomponist=${StoreVars.instance.autoNrKomponist} autoNrTitel=${StoreVars.instance.autoNrTitel}")
-        }
-*/    }
+    }
 }

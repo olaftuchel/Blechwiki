@@ -15,4 +15,4 @@ class TitelClass(
     @ColumnInfo(name = Constant.IX) val ix: String,
     @ColumnInfo(name = Constant.CHANGECOUNTER) var changecounter: Int,
     @ColumnInfo(name = Constant.CHANGE) var change: String
-    )
+)

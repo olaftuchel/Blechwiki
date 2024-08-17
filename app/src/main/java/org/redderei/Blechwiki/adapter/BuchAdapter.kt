@@ -1,7 +1,5 @@
 package org.redderei.Blechwiki.adapter
 
-import android.content.ContentValues
-import android.content.ContentValues.TAG
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -38,8 +36,6 @@ class BuchAdapter(var mList: List<BuchClass>) : RecyclerView.Adapter<BuchAdapter
         }
 
         init {
-// LiedTextView is nonsense here
-//            liedTextView = itemView.findViewById<View>(R.id.titel_eglied) as TextView
             titleTextView = itemView.findViewById<View>(R.id.titel_main) as TextView
             subtitleTextView = itemView.findViewById<View>(R.id.title_sub1) as TextView
             detailTextView = itemView.findViewById<View>(R.id.buch_list_nr) as TextView

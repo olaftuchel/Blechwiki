@@ -67,17 +67,5 @@ object Constant {
     const val TABLE_TITEL = "titel_table"
     const val TITELOHNEKOMMA = "titel_ohne_komma"
     const val TITEL = "titel"
-//    const val IX = "ix"
 
-    const val TITELNR = "titelNr"
-    const val TITELKOMPONIST = "titelKomponist"
-    const val TITELBESETZUNG = "titelBesetzung"
-    const val TITELVORZEICHEN = "titelVorzeichen"
-    const val TABLE_TITEL_IN_BUCH = "titel_in_buch_table"
-    const val DETAILLISTITEMTYPE = "detail_list_item_type"
-
-    const val TABLE_STORE = "store"
-    const val LAST_AUTONR_BUCH = "storeBuch"
-    const val LAST_AUTONR_KOMPONIST = "storeKomponist"
-    const val LAST_AUTONR_TITEL = "storeTitel"
 }

@@ -115,6 +115,9 @@ class BuchFragment : Fragment(), View.OnClickListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.d("BuchFragment", "onActivityCreated: savedInstanceState=$savedInstanceState")
+        // idea of the blow is: dependant of device size show (see onMyItemClick)
+        // a. just all books
+        // or. all books and details of one book nearby for large devices
 
 //        // 4. Access the ListView
 //        mBuchListView = getListView();
@@ -212,6 +215,7 @@ class BuchFragment : Fragment(), View.OnClickListener {
                 startActivity(intent)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

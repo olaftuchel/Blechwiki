@@ -284,7 +284,6 @@ class LiedFragment : Fragment(), View.OnClickListener {
      * für bestimmte Landeskirche, Sortierung und Teilselektion
      */
     fun changeLiederSelection(mKirche: String, sortType: String, query: String) {
-        //val mOnClickListener = View.OnClickListener { view: View -> onClick(view) }
         GlobalScope.launch(Dispatchers.Main){
             liedViewModel!!.getAllLieder(mKirche, sortType, query)?.observe(
                 requireActivity()
@@ -297,18 +296,6 @@ class LiedFragment : Fragment(), View.OnClickListener {
             }
         }
     }
-
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following
-    // methods defined by the NoticeDialogFragment.NoticeDialogListener
-    // interface.
-    /*
-    override fun onDialogPositiveClick(dialog: DialogFragment) {
-        // User taps the dialog's positive button.
-        val sharedPreference = SharedPreference(appContext)
-        val mKirche = sharedPreference.getValueString(Constant.PREF_KIRCHE).toString()
-        Log.d("LiedFragment", "onDialogPositiveClick: mKirche= ${mKirche}")
-    }*/
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
